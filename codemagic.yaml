@@ -21,19 +21,29 @@ workflows:
       - ~/Library/Developer/Xcode/DerivedData/**/Build/Products/**/*.app
 
   ios-signed-ipa:
-    name: iOS signed IPA
+    name: iOS signed IPA - App Store
     instance_type: mac_mini_m2
     max_build_duration: 60
     integrations:
       app_store_connect: Codemagic App Store Connect API
     environment:
       xcode: latest
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.zclei.smartsensorball
+      groups:
+        - code-signing
+      vars:
+        BUNDLE_ID: com.zclei.smartsensorball
     scripts:
       - name: Show Xcode version
         script: xcodebuild -version
+      - name: Initialize keychain
+        script: keychain initialize
+      - name: Fetch or create App Store signing files
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+      - name: Add signing certificates to keychain
+        script: keychain add-certificates
       - name: Apply App Store signing profiles
         script: xcode-project use-profiles --project "SmartSensorBall.xcodeproj"
       - name: Build signed IPA

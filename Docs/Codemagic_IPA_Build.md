@@ -37,13 +37,31 @@ Signed IPA builds require Apple Developer Program membership.
 1. Create the Bundle ID `com.zclei.smartsensorball`.
 2. Create the app `Smart sensor ball` in App Store Connect.
 3. In App Store Connect, create an API key with access for signing and upload.
-4. In Codemagic, add the App Store Connect integration named:
+4. In Codemagic, add the Apple Developer Portal / App Store Connect integration named:
 
 ```text
 Codemagic App Store Connect API
 ```
 
-5. Run the `ios-signed-ipa` workflow.
+5. Add a Codemagic environment variable group named `code-signing`.
+6. Add the secret variable `CERTIFICATE_PRIVATE_KEY` to that group. The value must be a 2048-bit RSA private key including the `-----BEGIN RSA PRIVATE KEY-----` and `-----END RSA PRIVATE KEY-----` lines.
+7. Run the `ios-signed-ipa` workflow.
+
+You can generate a new signing private key on macOS or Linux with:
+
+```bash
+ssh-keygen -t rsa -b 2048 -m PEM -f ios_distribution_private_key -q -N ""
+```
+
+Open `ios_distribution_private_key` as text and paste the full content into Codemagic as `CERTIFICATE_PRIVATE_KEY`.
+
+The workflow will run:
+
+```bash
+app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+```
+
+This lets Codemagic fetch or create the matching App Store provisioning profile and distribution certificate for `com.zclei.smartsensorball`.
 
 The generated IPA will be available from the Codemagic build artifacts.
 When TestFlight is ready, change `submit_to_testflight` in `codemagic.yaml`
