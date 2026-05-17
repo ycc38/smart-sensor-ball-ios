@@ -9,7 +9,7 @@ struct ContentView: View {
     @State private var showingFirstUsePrompt = false
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ZStack {
                 LinearGradient(colors: [Color(hex: "03120C"), Color(hex: "112D21")], startPoint: .top, endPoint: .bottom)
                     .ignoresSafeArea()
@@ -28,7 +28,6 @@ struct ContentView: View {
             .sheet(isPresented: $showingSettings) {
                 SettingsView(language: $selectedLanguage)
                     .environmentObject(bluetooth)
-                    .presentationDetents([.large])
             }
             .sheet(item: $showingLegal) { document in
                 LegalDocumentView(document: document, language: selectedLanguage)
@@ -51,6 +50,7 @@ struct ContentView: View {
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 
     private var header: some View {
@@ -198,4 +198,3 @@ private struct PrimaryButtonStyle: ButtonStyle {
             .background(color.opacity(configuration.isPressed ? 0.7 : 1), in: RoundedRectangle(cornerRadius: 12))
     }
 }
-

@@ -18,7 +18,7 @@ struct LegalDocumentView: View {
     let language: AppLanguage
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ScrollView {
                 Text(loadText())
                     .font(.body)
@@ -28,11 +28,12 @@ struct LegalDocumentView: View {
             }
             .navigationTitle(title)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button(L10n.text("done", language)) { dismiss() }
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 
     private var title: String {

@@ -6,7 +6,7 @@ struct SettingsView: View {
     @Binding var language: AppLanguage
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ScrollView {
                 VStack(spacing: 18) {
                     bluetoothCard
@@ -17,11 +17,12 @@ struct SettingsView: View {
             .background(Color(hex: "03120C").ignoresSafeArea())
             .navigationTitle(L10n.text("settings_title", language))
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button(L10n.text("done", language)) { dismiss() }
                 }
             }
         }
+        .navigationViewStyle(.stack)
     }
 
     private var bluetoothCard: some View {
@@ -96,7 +97,7 @@ struct SettingsView: View {
                 }
             }
             .pickerStyle(.inline)
-            .onChange(of: language) { _, newValue in
+            .onChange(of: language) { newValue in
                 newValue.save()
             }
         }
@@ -124,4 +125,3 @@ private extension View {
             .overlay(RoundedRectangle(cornerRadius: 18).stroke(stroke, lineWidth: 1))
     }
 }
-
