@@ -63,9 +63,8 @@ app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
 
 This lets Codemagic fetch or create the matching App Store provisioning profile and distribution certificate for `com.zclei.smartsensorball`.
 
-The generated IPA will be available from the Codemagic build artifacts.
-When TestFlight is ready, change `submit_to_testflight` in `codemagic.yaml`
-from `false` to `true`.
+The generated IPA will be available from the Codemagic build artifacts, and
+successful signed builds are submitted to TestFlight automatically.
 
 ## 4. Expected build settings
 
