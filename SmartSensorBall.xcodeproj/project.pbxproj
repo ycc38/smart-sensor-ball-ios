@@ -17,7 +17,7 @@
 		A00000000000000000000008 /* TrainingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000108 /* TrainingManager.swift */; };
 		A00000000000000000000009 /* SensorBallAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000109 /* SensorBallAPIClient.swift */; };
 		A00000000000000000000010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000120 /* Assets.xcassets */; };
-		A00000000000000000000011 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000121 /* Resources */; };
+		A00000000000000000000011 /* Legal in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000122 /* Legal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +34,7 @@
 		A00000000000000000000110 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A00000000000000000000120 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SmartSensorBall/Resources/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		A00000000000000000000121 /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Resources; sourceTree = "<group>"; };
+		A00000000000000000000122 /* Legal */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SmartSensorBall/Resources/Legal; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -175,7 +176,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00000000000000000000010 /* Assets.xcassets in Resources */,
-				A00000000000000000000011 /* Resources in Resources */,
+				A00000000000000000000011 /* Legal in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
