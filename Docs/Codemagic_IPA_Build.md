@@ -40,7 +40,7 @@ Signed IPA builds require Apple Developer Program membership.
 4. In Codemagic, add the Apple Developer Portal / App Store Connect integration named:
 
 ```text
-Codemagic App Store Connect API
+Codemagic App Store Connect
 ```
 
 5. Add a Codemagic environment variable group named `code-signing`.

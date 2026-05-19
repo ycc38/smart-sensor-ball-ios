@@ -25,7 +25,7 @@ workflows:
     instance_type: mac_mini_m2
     max_build_duration: 60
     integrations:
-      app_store_connect: Codemagic App Store Connect API
+      app_store_connect: Codemagic App Store Connect
     environment:
       xcode: latest
       groups:
