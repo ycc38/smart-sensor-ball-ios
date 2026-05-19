@@ -36,6 +36,7 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     @Published var connectedDevice: SensorBallDevice?
     @Published var telemetry: SensorBallTelemetry?
     @Published var statusText: String = "Bluetooth disconnected"
+    @Published var lastScanDebugText: String = ""
     @Published var displayHitCount: Int = 0
 
     private var central: CBCentralManager!
@@ -44,6 +45,7 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     private var lastRawHitCount: Int?
 
     private static let devicePrefix = "SENBALL#"
+    private static let sensorBallServiceUUIDs = ["FFE0", "0000FFE0-0000-1000-8000-00805F9B34FB"]
     private static let telemetryPacketSize = 11
     private static let telemetryHeader: [UInt8] = [0xD5, 0x5D, 0x03]
     private static let commandOpenGyro = Data([0xC5, 0x5C, 0x04, 0x01])
@@ -72,6 +74,7 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         }
         devices.removeAll()
         selectedDevice = nil
+        lastScanDebugText = ""
         statusText = "Scanning SENBALL# devices..."
         central.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey: false])
     }
@@ -157,6 +160,26 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         }
         return nil
     }
+
+    private static func advertisedServiceUUIDs(from advertisementData: [String: Any]) -> [CBUUID] {
+        var serviceUUIDs: [CBUUID] = []
+        serviceUUIDs.append(contentsOf: advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID] ?? [])
+        serviceUUIDs.append(contentsOf: advertisementData[CBAdvertisementDataOverflowServiceUUIDsKey] as? [CBUUID] ?? [])
+        serviceUUIDs.append(contentsOf: advertisementData[CBAdvertisementDataSolicitedServiceUUIDsKey] as? [CBUUID] ?? [])
+        if let serviceData = advertisementData[CBAdvertisementDataServiceDataKey] as? [CBUUID: Data] {
+            serviceUUIDs.append(contentsOf: serviceData.keys)
+        }
+        return serviceUUIDs
+    }
+
+    private static func matchesSensorBall(name: String, serviceUUIDs: [CBUUID]) -> Bool {
+        if name.uppercased().hasPrefix(devicePrefix) {
+            return true
+        }
+        return serviceUUIDs.contains { uuid in
+            sensorBallServiceUUIDs.contains(uuid.uuidString.uppercased())
+        }
+    }
 }
 
 extension SensorBallBluetoothManager: CBCentralManagerDelegate {
@@ -177,11 +200,17 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
 
     nonisolated func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
         Task { @MainActor in
-            let name = peripheral.name ?? advertisementData[CBAdvertisementDataLocalNameKey] as? String ?? ""
-            guard name.uppercased().hasPrefix(Self.devicePrefix) else {
+            let advertisedName = advertisementData[CBAdvertisementDataLocalNameKey] as? String
+            let name = advertisedName ?? peripheral.name ?? ""
+            let serviceUUIDs = Self.advertisedServiceUUIDs(from: advertisementData)
+            let serviceText = serviceUUIDs.map(\.uuidString).joined(separator: ",")
+            lastScanDebugText = "Last seen: \(name.isEmpty ? "N/A" : name), services: \(serviceText.isEmpty ? "N/A" : serviceText), RSSI: \(RSSI.intValue)"
+
+            guard Self.matchesSensorBall(name: name, serviceUUIDs: serviceUUIDs) else {
                 return
             }
-            let item = SensorBallDevice(id: peripheral.identifier, name: name, identifier: peripheral.identifier, rssi: RSSI.intValue, peripheral: peripheral)
+            let displayName = name.isEmpty ? "\(Self.devicePrefix)\(peripheral.identifier.uuidString.prefix(6))" : name
+            let item = SensorBallDevice(id: peripheral.identifier, name: displayName, identifier: peripheral.identifier, rssi: RSSI.intValue, peripheral: peripheral)
             if !devices.contains(where: { $0.identifier == item.identifier }) {
                 devices.append(item)
             }

@@ -40,6 +40,13 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(hex: "082018"), in: RoundedRectangle(cornerRadius: 12))
 
+            if !bluetooth.lastScanDebugText.isEmpty {
+                Text(bluetooth.lastScanDebugText)
+                    .font(.caption)
+                    .foregroundStyle(Color(hex: "8FEFBC"))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
             HStack(spacing: 10) {
                 Button(L10n.text("scan", language)) { bluetooth.startScan() }
                     .buttonStyle(SettingsButtonStyle(color: Color(hex: "008840")))
