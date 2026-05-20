@@ -60,7 +60,9 @@ struct ContentView: View {
                         tabBar
                         pageBody
                     }
-                    .padding(18)
+                    .padding(.horizontal, 18)
+                    .padding(.top, 48)
+                    .padding(.bottom, 22)
                 }
             }
             .navigationBarHidden(true)
@@ -232,30 +234,36 @@ struct ContentView: View {
     private var trainingPage: some View {
         VStack(spacing: 14) {
             SurfaceCard(stroke: Color(hex: "00FF88")) {
-                ZStack(alignment: .topTrailing) {
-                    Image("training_center_watermark")
-                        .resizable()
-                        .scaledToFit()
-                        .opacity(0.16)
-                        .frame(maxWidth: 240)
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 6) {
-                                Badge(text: "TRAINING", color: Color(hex: "80FFB0"), textColor: Color(hex: "140800"))
-                                Text(training.modeTitle(language: selectedLanguage))
-                                .font(.title2.weight(.black))
-                                    .foregroundStyle(Color(hex: "FFF6E5"))
-                                Text(training.modeBody(language: selectedLanguage))
-                                    .font(.callout)
-                                    .foregroundStyle(Color(hex: "DFFFF0"))
-                            }
-                            Spacer()
-                        }
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Badge(text: "TRAINING", color: Color(hex: "80FFB0"), textColor: Color(hex: "140800"))
+                        Text(training.modeTitle(language: selectedLanguage))
+                            .font(.title2.weight(.black))
+                            .foregroundStyle(Color(hex: "FFF6E5"))
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.82)
+                        Text(training.modeBody(language: selectedLanguage))
+                            .font(.callout)
+                            .foregroundStyle(Color(hex: "DFFFF0"))
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
                         Text(training.progressLine(language: selectedLanguage))
                             .font(.caption.bold())
                             .foregroundStyle(Color(hex: "FFD060"))
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.78)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Image("training_center_watermark")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 118, height: 148)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .opacity(0.22)
                 }
+                .frame(minHeight: 150, maxHeight: 164)
             }
 
             modeGrid
@@ -330,7 +338,7 @@ struct ContentView: View {
                         Text(L10n.text(mode.mode.labelKey, selectedLanguage))
                             .font(.caption.bold())
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, minHeight: 70, alignment: .leading)
                     .padding(13)
                     .foregroundStyle(training.selectedPlayMode == mode ? Color(hex: "140800") : Color(hex: "FFF0C9"))
                     .background(training.selectedPlayMode == mode ? Color(hex: "FFB347") : Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
