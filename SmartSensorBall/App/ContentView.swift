@@ -111,7 +111,7 @@ struct ContentView: View {
                 Task { await cloud.bootstrap(language: language) }
             }
             .onChange(of: training.latestReport) { report in
-                guard let report else { return }
+                guard let report = report else { return }
                 Task { await cloud.upload(report: report, language: selectedLanguage) }
             }
         }
@@ -243,7 +243,7 @@ struct ContentView: View {
                             VStack(alignment: .leading, spacing: 6) {
                                 Badge(text: "TRAINING", color: Color(hex: "80FFB0"), textColor: Color(hex: "140800"))
                                 Text(training.modeTitle(language: selectedLanguage))
-                                    .font(.title2.black())
+                                .font(.title2.weight(.black))
                                     .foregroundStyle(Color(hex: "FFF6E5"))
                                 Text(training.modeBody(language: selectedLanguage))
                                     .font(.callout)
@@ -360,7 +360,7 @@ struct ContentView: View {
                     VStack(alignment: .leading, spacing: 5) {
                         Badge(text: report.goalMet ? "VICTORY" : "GOOD WORK", color: Color(hex: "FFD060"), textColor: Color(hex: "140800"))
                         Text(L10n.text("training_report", selectedLanguage))
-                            .font(.title3.black())
+                        .font(.title3.weight(.black))
                             .foregroundStyle(Color(hex: "FFF6E5"))
                     }
                     Spacer()
@@ -394,7 +394,7 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Badge(text: L10n.text("current_tier", selectedLanguage), color: Color(hex: "FFD060"), textColor: Color(hex: "140800"))
                     Text(tierName(cloud.tier?.key, fallbackLevel: cloud.tier?.level ?? training.trainingLevel))
-                        .font(.title2.black())
+                        .font(.title2.weight(.black))
                         .foregroundStyle(Color(hex: "FFF6E5"))
                     Text("\(items.filter(\.unlocked).count)/\(items.count) \(L10n.text("badges_unlocked", selectedLanguage))")
                         .font(.callout)
@@ -444,7 +444,7 @@ struct ContentView: View {
             SurfaceCard(stroke: Color(hex: "FF9A30")) {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(L10n.text("leaderboard_title", selectedLanguage))
-                        .font(.title2.black())
+                        .font(.title2.weight(.black))
                         .foregroundStyle(Color(hex: "FFF6E5"))
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                         ForEach(LeaderboardBoard.allCases) { board in
@@ -519,7 +519,7 @@ struct ContentView: View {
     private func leaderboardRowContent(_ entry: CloudLeaderboardEntry) -> some View {
         HStack {
             Text("#\(entry.rank)")
-                .font(.title3.black())
+                .font(.title3.weight(.black))
                 .foregroundStyle(Color(hex: "FFD060"))
                 .frame(width: 52, alignment: .leading)
             VStack(alignment: .leading, spacing: 4) {
@@ -533,7 +533,7 @@ struct ContentView: View {
             Spacer()
             VStack(alignment: .trailing, spacing: 4) {
                 Text(leaderboardPrimary(entry))
-                    .font(.headline.black())
+                    .font(.headline.weight(.black))
                     .foregroundStyle(Color(hex: "80FFB0"))
                 Text(String(format: "%.2f/s", entry.averageFrequency))
                     .font(.caption.bold())
@@ -549,13 +549,13 @@ struct ContentView: View {
                     ZStack {
                         Circle().fill(Color(hex: cloud.profile?.avatarColor ?? profileColor))
                         Text(avatarInitial())
-                            .font(.title.black())
+                            .font(.title.weight(.black))
                             .foregroundStyle(.white)
                     }
                     .frame(width: 74, height: 74)
                     VStack(alignment: .leading, spacing: 7) {
                         Text(cloud.profile?.nickname ?? L10n.text("guest_trainer", selectedLanguage))
-                            .font(.title3.black())
+                            .font(.title3.weight(.black))
                             .foregroundStyle(Color(hex: "FFF6E5"))
                         Text(cloud.profile?.serialMasked ?? cloud.activationState?.serial ?? L10n.text("not_activated", selectedLanguage))
                             .font(.caption.bold())
@@ -747,7 +747,7 @@ struct ContentView: View {
     }
 
     private func tierName(_ key: String?, fallbackLevel: Int) -> String {
-        guard let key, !key.isEmpty else {
+        guard let key = key, !key.isEmpty else {
             return "Lv.\(fallbackLevel)"
         }
         return key.replacingOccurrences(of: "_", with: " ").capitalized + " Lv.\(fallbackLevel)"
@@ -814,7 +814,7 @@ private struct Badge: View {
 
     var body: some View {
         Text(text)
-            .font(.caption2.black())
+            .font(.caption2.weight(.black))
             .padding(.horizontal, 9)
             .padding(.vertical, 5)
             .foregroundStyle(textColor)
@@ -834,7 +834,7 @@ private struct MetricPill: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Text(value)
-                .font(.headline.black())
+                .font(.headline.weight(.black))
                 .foregroundStyle(Color(hex: "FFD060"))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)

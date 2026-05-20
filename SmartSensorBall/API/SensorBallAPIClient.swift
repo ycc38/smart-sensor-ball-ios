@@ -414,7 +414,7 @@ final class CloudStore: ObservableObject {
     }
 
     func bootstrap(language: AppLanguage) async {
-        guard let activationState else {
+        guard let activationState = activationState else {
             statusMessage = L10n.text("cloud_needs_activation", language)
             return
         }
@@ -426,7 +426,7 @@ final class CloudStore: ObservableObject {
     }
 
     func updateProfile(nickname: String, language: AppLanguage, avatarColor: String) async {
-        guard let activationState else {
+        guard let activationState = activationState else {
             statusMessage = L10n.text("cloud_needs_activation", language)
             return
         }
@@ -438,7 +438,7 @@ final class CloudStore: ObservableObject {
     }
 
     func upload(report: TrainingReport, language: AppLanguage) async {
-        guard let activationState else {
+        guard let activationState = activationState else {
             statusMessage = L10n.text("cloud_needs_activation", language)
             return
         }
@@ -450,7 +450,7 @@ final class CloudStore: ObservableObject {
     }
 
     func refreshLeaderboard(language: AppLanguage) async {
-        guard let activationState else {
+        guard let activationState = activationState else {
             statusMessage = L10n.text("cloud_needs_activation", language)
             return
         }
@@ -517,7 +517,7 @@ final class CloudStore: ObservableObject {
     }
 
     private func saveActivationState() {
-        if let activationState,
+        if let activationState = activationState,
            let data = try? JSONEncoder().encode(activationState) {
             UserDefaults.standard.set(data, forKey: Keys.activation)
         }

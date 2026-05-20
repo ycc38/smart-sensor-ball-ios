@@ -212,7 +212,7 @@ final class TrainingManager: ObservableObject {
         guard !isRunning else {
             return
         }
-        guard let bluetoothManager, bluetoothManager.isConnected else {
+        guard let bluetoothManager = bluetoothManager, bluetoothManager.isConnected else {
             phase = .error
             statusKey = "connect_first"
             return
@@ -233,7 +233,7 @@ final class TrainingManager: ObservableObject {
 
         timerTask?.cancel()
         timerTask = Task { [weak self, weak bluetoothManager] in
-            guard let self, let bluetoothManager else { return }
+            guard let self = self, let bluetoothManager = bluetoothManager else { return }
             for value in stride(from: 3, through: 1, by: -1) {
                 if Task.isCancelled { return }
                 self.countdownText = "\(value)"

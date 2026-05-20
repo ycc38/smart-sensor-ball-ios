@@ -92,7 +92,7 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     }
 
     func connectSelected() {
-        guard let selectedDevice else {
+        guard let selectedDevice = selectedDevice else {
             statusText = "Select a SENBALL# device first"
             return
         }
@@ -120,7 +120,7 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
 
     @discardableResult
     func setGyroscopeEnabled(_ enabled: Bool) -> Bool {
-        guard let connectedDevice, let writeCharacteristic else {
+        guard let connectedDevice = connectedDevice, let writeCharacteristic = writeCharacteristic else {
             statusText = "Bluetooth write channel unavailable"
             return false
         }
