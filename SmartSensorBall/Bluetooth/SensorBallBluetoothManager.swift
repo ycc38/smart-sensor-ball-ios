@@ -1,5 +1,5 @@
-import CoreBluetooth
 import Combine
+import CoreBluetooth
 import Foundation
 
 struct SensorBallDevice: Identifiable, Equatable {
@@ -7,6 +7,7 @@ struct SensorBallDevice: Identifiable, Equatable {
     let name: String
     let identifier: UUID
     let rssi: Int
+    let advertisedServices: [String]
     fileprivate let peripheral: CBPeripheral
 
     static func == (lhs: SensorBallDevice, rhs: SensorBallDevice) -> Bool {
@@ -18,13 +19,18 @@ struct SensorBallTelemetry: Equatable {
     let packetIndex: Int
     let batteryRaw: Int
     let hitCount: Int
-    let peak: Int
+    let forceLow: Int
+    let forceHigh: Int
+    let forceN: Int
+
+    var peak: Int { forceN }
 
     var batteryText: String {
         switch batteryRaw {
-        case 0xFF: return "--"
+        case 101: return "Charging"
+        case 102: return "Full"
         case 0...100: return "\(batteryRaw)%"
-        default: return "\(batteryRaw)"
+        default: return "--"
         }
     }
 }
@@ -38,9 +44,11 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     @Published var statusText: String = "Bluetooth disconnected"
     @Published var lastScanDebugText: String = ""
     @Published var displayHitCount: Int = 0
+    @Published var peakForce: Int = 0
 
     private var central: CBCentralManager!
     private var notifyCharacteristics: [CBCharacteristic] = []
+    private var readableCharacteristics: [CBCharacteristic] = []
     private var writeCharacteristic: CBCharacteristic?
     private var lastRawHitCount: Int?
 
@@ -79,6 +87,10 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         central.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey: false])
     }
 
+    func stopScan() {
+        central.stopScan()
+    }
+
     func connectSelected() {
         guard let selectedDevice else {
             statusText = "Select a SENBALL# device first"
@@ -95,8 +107,15 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         }
         connectedDevice = nil
         writeCharacteristic = nil
+        readableCharacteristics.removeAll()
         notifyCharacteristics.removeAll()
         statusText = "Bluetooth disconnected"
+    }
+
+    func resetDisplayHitCount() {
+        lastRawHitCount = nil
+        displayHitCount = 0
+        peakForce = 0
     }
 
     @discardableResult
@@ -113,11 +132,27 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         return true
     }
 
+    @discardableResult
+    func requestTelemetryRefresh(allowGyroscopeOffFallback: Bool = true) -> Bool {
+        guard let peripheral = connectedDevice?.peripheral else {
+            return false
+        }
+        if let readable = readableCharacteristics.sorted(by: { Self.characteristicScore($0) > Self.characteristicScore($1) }).first {
+            peripheral.readValue(for: readable)
+            return true
+        }
+        if allowGyroscopeOffFallback {
+            return setGyroscopeEnabled(false)
+        }
+        return false
+    }
+
     private func handleTelemetry(_ data: Data) {
         guard let telemetry = Self.parseTelemetry(data) else {
             return
         }
         self.telemetry = telemetry
+        peakForce = telemetry.forceN
         updateHitCount(rawCount: telemetry.hitCount)
         statusText = "Packet \(telemetry.packetIndex) received"
     }
@@ -125,7 +160,6 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     private func updateHitCount(rawCount: Int) {
         guard let previous = lastRawHitCount else {
             lastRawHitCount = rawCount
-            displayHitCount = 0
             return
         }
         let delta: Int
@@ -148,14 +182,20 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
             return nil
         }
         for index in 0...(bytes.count - telemetryPacketSize) {
-            guard bytes[index] == telemetryHeader[0], bytes[index + 1] == telemetryHeader[1], bytes[index + 2] == telemetryHeader[2] else {
+            guard bytes[index] == telemetryHeader[0],
+                  bytes[index + 1] == telemetryHeader[1],
+                  bytes[index + 2] == telemetryHeader[2] else {
                 continue
             }
+            let forceLow = Int(bytes[index + 9])
+            let forceHigh = Int(bytes[index + 10])
             return SensorBallTelemetry(
                 packetIndex: Int(bytes[index + 3]),
                 batteryRaw: Int(bytes[index + 4]),
                 hitCount: Int(bytes[index + 5]),
-                peak: Int(bytes[index + 7])
+                forceLow: forceLow,
+                forceHigh: forceHigh,
+                forceN: forceLow | (forceHigh << 8)
             )
         }
         return nil
@@ -179,6 +219,14 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         return serviceUUIDs.contains { uuid in
             sensorBallServiceUUIDs.contains(uuid.uuidString.uppercased())
         }
+    }
+
+    private static func characteristicScore(_ characteristic: CBCharacteristic) -> Int {
+        var score = 0
+        if characteristic.uuid.uuidString.lowercased().contains("ffe4") { score += 10 }
+        if characteristic.properties.contains(.notify) { score += 4 }
+        if characteristic.properties.contains(.read) { score += 2 }
+        return score
     }
 }
 
@@ -210,8 +258,17 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
                 return
             }
             let displayName = name.isEmpty ? "\(Self.devicePrefix)\(peripheral.identifier.uuidString.prefix(6))" : name
-            let item = SensorBallDevice(id: peripheral.identifier, name: displayName, identifier: peripheral.identifier, rssi: RSSI.intValue, peripheral: peripheral)
-            if !devices.contains(where: { $0.identifier == item.identifier }) {
+            let item = SensorBallDevice(
+                id: peripheral.identifier,
+                name: displayName,
+                identifier: peripheral.identifier,
+                rssi: RSSI.intValue,
+                advertisedServices: serviceUUIDs.map(\.uuidString),
+                peripheral: peripheral
+            )
+            if let existingIndex = devices.firstIndex(where: { $0.identifier == item.identifier }) {
+                devices[existingIndex] = item
+            } else {
                 devices.append(item)
             }
             if devices.count == 1 {
@@ -225,7 +282,17 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
         Task { @MainActor in
             peripheral.delegate = self
             connectedDevice = devices.first(where: { $0.identifier == peripheral.identifier }) ??
-                SensorBallDevice(id: peripheral.identifier, name: peripheral.name ?? "SENBALL#", identifier: peripheral.identifier, rssi: 0, peripheral: peripheral)
+                SensorBallDevice(
+                    id: peripheral.identifier,
+                    name: peripheral.name ?? "SENBALL#",
+                    identifier: peripheral.identifier,
+                    rssi: 0,
+                    advertisedServices: [],
+                    peripheral: peripheral
+                )
+            writeCharacteristic = nil
+            readableCharacteristics.removeAll()
+            notifyCharacteristics.removeAll()
             statusText = "Connected. Discovering services..."
             peripheral.discoverServices(nil)
         }
@@ -235,6 +302,7 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
         Task { @MainActor in
             connectedDevice = nil
             writeCharacteristic = nil
+            readableCharacteristics.removeAll()
             notifyCharacteristics.removeAll()
             statusText = "Bluetooth disconnected"
         }
@@ -256,6 +324,9 @@ extension SensorBallBluetoothManager: CBPeripheralDelegate {
                 if writeCharacteristic == nil && (characteristic.properties.contains(.write) || characteristic.properties.contains(.writeWithoutResponse)) {
                     writeCharacteristic = characteristic
                 }
+                if characteristic.properties.contains(.read) {
+                    readableCharacteristics.append(characteristic)
+                }
                 if characteristic.properties.contains(.notify) || characteristic.properties.contains(.indicate) {
                     notifyCharacteristics.append(characteristic)
                     peripheral.setNotifyValue(true, for: characteristic)
@@ -264,6 +335,7 @@ extension SensorBallBluetoothManager: CBPeripheralDelegate {
             if writeCharacteristic != nil {
                 statusText = "Bluetooth ready"
                 setGyroscopeEnabled(false)
+                requestTelemetryRefresh(allowGyroscopeOffFallback: false)
             }
         }
     }

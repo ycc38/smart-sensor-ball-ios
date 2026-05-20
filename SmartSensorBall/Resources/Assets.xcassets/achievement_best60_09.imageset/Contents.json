@@ -1,0 +1,13 @@
+{
+  "images": [
+    {
+      "filename": "achievement_best60_09.png",
+      "idiom": "universal",
+      "scale": "1x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
