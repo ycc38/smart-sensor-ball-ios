@@ -10,7 +10,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 
     static var current: AppLanguage {
         let stored = UserDefaults.standard.string(forKey: "app_language")
-        return AppLanguage(rawValue: stored ?? "") ?? .english
+        return AppLanguage(rawValue: stored ?? "") ?? .chinese
     }
 
     var displayName: String {
@@ -53,10 +53,10 @@ enum L10n {
         "cancel": "Cancel",
         "refresh": "Refresh",
 
-        "tab_training": "Training",
-        "tab_achievements": "Badges",
-        "tab_leaderboard": "Rank",
-        "tab_profile": "Profile",
+        "tab_training": "Training Center",
+        "tab_achievements": "Training Results",
+        "tab_leaderboard": "Rankings",
+        "tab_profile": "Profile Center",
 
         "bluetooth_connection": "Bluetooth Connection",
         "bluetooth_hint": "Scan for a SENBALL# / FFE0 BLE device first. Training is available after connection.",
@@ -107,6 +107,7 @@ enum L10n {
         "stopped": "Training stopped",
         "start": "Start",
         "end": "End",
+        "mode": "Mode",
         "target": "Target",
         "streak": "Streak",
         "hits_short": "hits",
@@ -115,10 +116,10 @@ enum L10n {
         "mode_60": "60 sec",
         "mode_burst10": "10 sec",
         "mode_burst15": "15 sec",
-        "play_classic30": "Classic 30",
-        "play_classic60": "Classic 60",
-        "play_burst10": "Burst 10",
-        "play_burst15": "Burst 15",
+        "play_classic30": "Classic 30s",
+        "play_classic60": "Endurance 60s",
+        "play_burst10": "Burst 10s",
+        "play_burst15": "Burst 15s",
         "play_level": "Level Challenge",
         "play_daily": "Daily Challenge",
         "play_classic30_body": "Balanced 30-second reaction training.",
@@ -175,10 +176,10 @@ enum L10n {
         "cancel": "取消",
         "refresh": "刷新",
 
-        "tab_training": "训练",
-        "tab_achievements": "徽章",
-        "tab_leaderboard": "排行",
-        "tab_profile": "我的",
+        "tab_training": "训练中心",
+        "tab_achievements": "训练成果",
+        "tab_leaderboard": "榜单排名",
+        "tab_profile": "个人中心",
 
         "bluetooth_connection": "蓝牙连接",
         "bluetooth_hint": "请先扫描 SENBALL# / FFE0 设备，连接成功后即可开始训练。",
@@ -229,6 +230,7 @@ enum L10n {
         "stopped": "训练已停止",
         "start": "开始",
         "end": "结束",
+        "mode": "模式",
         "target": "目标",
         "streak": "连续训练",
         "hits_short": "击",
@@ -237,10 +239,10 @@ enum L10n {
         "mode_60": "60 秒",
         "mode_burst10": "10 秒",
         "mode_burst15": "15 秒",
-        "play_classic30": "经典 30",
-        "play_classic60": "经典 60",
-        "play_burst10": "爆发 10",
-        "play_burst15": "爆发 15",
+        "play_classic30": "经典30秒",
+        "play_classic60": "60秒耐力",
+        "play_burst10": "10秒爆发",
+        "play_burst15": "15秒爆发",
         "play_level": "闯关挑战",
         "play_daily": "每日挑战",
         "play_classic30_body": "均衡的 30 秒反应训练。",

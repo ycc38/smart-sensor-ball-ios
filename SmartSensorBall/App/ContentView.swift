@@ -11,10 +11,10 @@ private enum HomePage: String, CaseIterable, Identifiable {
 
     var icon: String {
         switch self {
-        case .training: return "bolt.fill"
-        case .achievements: return "medal.fill"
-        case .leaderboard: return "trophy.fill"
-        case .profile: return "person.crop.circle.fill"
+        case .training: return "play.fill"
+        case .achievements: return "star.fill"
+        case .leaderboard: return "line.3.horizontal.decrease"
+        case .profile: return "person.fill"
         }
     }
 
@@ -49,20 +49,31 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LinearGradient(colors: [Color(hex: "040C08"), Color(hex: "251008"), Color(hex: "0B1711")], startPoint: .topLeading, endPoint: .bottomTrailing)
+                LinearGradient(colors: [Color(hex: "070806"), Color(hex: "17110C"), Color(hex: "050806")], startPoint: .topLeading, endPoint: .bottomTrailing)
                     .ignoresSafeArea()
-                ScrollView {
-                    VStack(spacing: 16) {
-                        header
-                        if !cloud.isActivated {
-                            activationCard
-                        }
-                        tabBar
-                        pageBody
+
+                VStack(spacing: 0) {
+                    header
+                        .padding(.horizontal, 28)
+                        .padding(.top, 50)
+                        .padding(.bottom, 14)
+
+                    if !cloud.isActivated {
+                        activationCard
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 10)
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 48)
-                    .padding(.bottom, 22)
+
+                    ScrollView(showsIndicators: false) {
+                        pageBody
+                            .padding(.horizontal, 28)
+                            .padding(.bottom, 14)
+                    }
+
+                    tabBar
+                        .padding(.horizontal, 20)
+                        .padding(.top, 6)
+                        .padding(.bottom, 18)
                 }
             }
             .navigationBarHidden(true)
@@ -121,22 +132,15 @@ struct ContentView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 14) {
-            Image("app_logo_aurora_compact")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 56, height: 56)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+        HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 5) {
                 Text("Smart sensor ball")
-                    .font(.system(size: 24, weight: .black))
+                    .font(.system(size: 26, weight: .black))
                     .foregroundStyle(Color(hex: "FFF6E5"))
                 HStack(spacing: 10) {
-                    Image(systemName: "bonjour")
+                    Image(systemName: "dot.radiowaves.left.and.right")
+                        .font(.system(size: 20, weight: .bold))
                         .foregroundStyle(bluetooth.isConnected ? Color(hex: "44FF88") : Color(hex: "FF5C5C"))
-                    Text(bluetooth.connectedDevice?.name ?? L10n.text("bluetooth_disconnected", selectedLanguage))
-                        .font(.caption.bold())
-                        .foregroundStyle(Color(hex: "DFFFF0"))
                     BatteryBadge(text: bluetooth.telemetry?.batteryText ?? "--")
                 }
             }
@@ -144,11 +148,10 @@ struct ContentView: View {
             Button {
                 showingSettings = true
             } label: {
-                Image(systemName: "gearshape.fill")
+                Image(systemName: "wrench.fill")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(Color(hex: "44FF88"))
-                    .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+                    .frame(width: 42, height: 42)
             }
             .accessibilityLabel(L10n.text("settings", selectedLanguage))
             .disabled(training.isBusy)
@@ -192,7 +195,7 @@ struct ContentView: View {
     }
 
     private var tabBar: some View {
-        HStack(spacing: 8) {
+        HStack(alignment: .bottom, spacing: 12) {
             ForEach(HomePage.allCases) { page in
                 Button {
                     withAnimation(.easeOut(duration: 0.2)) {
@@ -201,22 +204,20 @@ struct ContentView: View {
                 } label: {
                     VStack(spacing: 6) {
                         Image(systemName: page.icon)
-                            .font(.system(size: 17, weight: .bold))
+                            .font(.system(size: selectedPage == page ? 27 : 23, weight: .black))
                         Text(page.title(language: selectedLanguage))
-                            .font(.caption2.bold())
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
+                            .font(.system(size: 12, weight: .black))
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
+                            .minimumScaleFactor(0.72)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .foregroundStyle(selectedPage == page ? Color(hex: "140800") : Color(hex: "FFF0C9"))
-                    .background(selectedPage == page ? Color(hex: "FFD060") : Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+                    .frame(maxWidth: .infinity, minHeight: selectedPage == page ? 82 : 64)
+                    .padding(.vertical, selectedPage == page ? 10 : 4)
+                    .foregroundStyle(selectedPage == page ? Color(hex: "12381E") : Color(hex: "67CC76"))
+                    .background(selectedPage == page ? Color(hex: "5DD264") : Color.clear, in: RoundedRectangle(cornerRadius: 14))
                 }
             }
         }
-        .padding(10)
-        .background(Color(hex: "120F0D").opacity(0.95), in: RoundedRectangle(cornerRadius: 18))
-        .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color(hex: "4B3720"), lineWidth: 1))
     }
 
     @ViewBuilder
@@ -234,132 +235,89 @@ struct ContentView: View {
     }
 
     private var trainingPage: some View {
-        VStack(spacing: 14) {
-            SurfaceCard(stroke: Color(hex: "00FF88")) {
-                HStack(alignment: .top, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Badge(text: "TRAINING", color: Color(hex: "80FFB0"), textColor: Color(hex: "140800"))
-                        Text(training.modeTitle(language: selectedLanguage))
-                            .font(.title2.weight(.black))
-                            .foregroundStyle(Color(hex: "FFF6E5"))
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.82)
-                        Text(training.modeBody(language: selectedLanguage))
-                            .font(.callout)
-                            .foregroundStyle(Color(hex: "DFFFF0"))
-                            .lineLimit(2)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Spacer(minLength: 0)
-                        Text(training.progressLine(language: selectedLanguage))
-                            .font(.caption.bold())
-                            .foregroundStyle(Color(hex: "FFD060"))
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.78)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        VStack(spacing: 16) {
+            VStack(spacing: 12) {
+                Text(cloud.isActivated ? training.statusText(language: selectedLanguage) : L10n.text("activation_required", selectedLanguage))
+                    .font(.system(size: 17, weight: .black))
+                    .foregroundStyle(Color(hex: "F5E7CF"))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.78)
+                    .frame(maxWidth: .infinity)
 
-                    Image("training_center_watermark")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 118, height: 148)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .opacity(0.22)
+                Text(training.countdownText)
+                    .font(.system(size: 42, weight: .black))
+                    .foregroundStyle(Color(hex: "E59A32"))
+
+                Text("\(training.realTimeHits)")
+                    .font(.system(size: 80, weight: .black))
+                    .foregroundStyle(Color(hex: "FFF0E0"))
+
+                Text(remainingText())
+                    .font(.system(size: 16, weight: .black))
+                    .foregroundStyle(Color(hex: "E59A32"))
+
+                HStack(spacing: 14) {
+                    Button {
+                        Task { await training.start(isActivated: cloud.isActivated) }
+                    } label: {
+                        Text(L10n.text("start", selectedLanguage))
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(PillTrainingButtonStyle(color: Color(hex: "F15A13")))
+                    .disabled(training.isBusy || !bluetooth.isConnected || !cloud.isActivated)
+                    .opacity(training.isBusy || !bluetooth.isConnected || !cloud.isActivated ? 0.58 : 1.0)
+
+                    Button {
+                        Task { await training.stop() }
+                    } label: {
+                        Text(L10n.text("end", selectedLanguage))
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(PillTrainingButtonStyle(color: Color(hex: "8E3E4D")))
+                    .disabled(!training.isBusy)
+                    .opacity(training.isBusy ? 1.0 : 0.58)
                 }
-                .frame(minHeight: 150, maxHeight: 164)
             }
+            .padding(.top, 8)
 
-            modeGrid
-
-            SurfaceCard(stroke: Color(hex: "FF9A30")) {
-                VStack(spacing: 14) {
-                    HStack(alignment: .center) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(training.countdownText)
-                                .font(.system(size: 52, weight: .black))
-                                .foregroundStyle(Color(hex: "FFF6E5"))
-                            Text(cloud.isActivated ? training.statusText(language: selectedLanguage) : L10n.text("activation_required", selectedLanguage))
-                                .font(.headline)
-                                .foregroundStyle(Color(hex: "FFD060"))
-                            Text(formatRemaining(training.remainingMillis))
-                                .font(.caption.bold())
-                                .foregroundStyle(Color(hex: "DFFFF0"))
-                        }
-                        Spacer()
-                        VStack(alignment: .trailing, spacing: 3) {
-                            Text("\(training.realTimeHits)")
-                                .font(.system(size: 64, weight: .black))
-                                .foregroundStyle(Color(hex: "80FFB0"))
-                            Text(L10n.text("punch_count", selectedLanguage))
-                                .font(.caption.bold())
-                                .foregroundStyle(Color(hex: "DFFFF0"))
-                        }
-                    }
-                    HStack(spacing: 10) {
-                        MetricPill(title: L10n.text("battery", selectedLanguage), value: bluetooth.telemetry?.batteryText ?? "--")
-                        MetricPill(title: L10n.text("peak_force", selectedLanguage), value: "\(bluetooth.peakForce)")
-                        MetricPill(title: L10n.text("target", selectedLanguage), value: training.targetHits().map(String.init) ?? "--")
-                    }
-                    HStack(spacing: 12) {
-                        Button {
-                            Task { await training.start(isActivated: cloud.isActivated) }
-                        } label: {
-                            Label(L10n.text("start", selectedLanguage), systemImage: "play.fill")
-                        }
-                        .buttonStyle(ActionButtonStyle(color: Color(hex: "008840")))
-                        .disabled(training.isBusy || !bluetooth.isConnected || !cloud.isActivated)
-                        Button {
-                            Task { await training.stop() }
-                        } label: {
-                            Label(L10n.text("end", selectedLanguage), systemImage: "stop.fill")
-                        }
-                        .buttonStyle(ActionButtonStyle(color: Color(hex: "783333")))
-                        .disabled(!training.isBusy)
-                    }
-                }
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L10n.text("mode", selectedLanguage))
+                    .font(.system(size: 24, weight: .black))
+                    .foregroundStyle(Color(hex: "FFF6E5"))
+                modeList
             }
 
             if let report = training.latestReport {
                 reportCard(report)
-            } else {
-                emptyReportCard
             }
         }
     }
 
-    private var modeGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+    private var modeList: some View {
+        VStack(spacing: 8) {
             ForEach(TrainingPlayMode.allCases) { mode in
                 Button {
                     training.selectedPlayMode = mode
                 } label: {
-                    VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 12) {
+                        Text(modeMarker(mode))
+                            .font(.system(size: 19, weight: .black))
+                            .foregroundStyle(modeAccent(mode))
                         Text(L10n.text(mode.titleKey, selectedLanguage))
-                            .font(.headline)
+                            .font(.system(size: 16, weight: .black))
                             .lineLimit(1)
-                            .minimumScaleFactor(0.72)
-                        Text(L10n.text(mode.mode.labelKey, selectedLanguage))
-                            .font(.caption.bold())
+                            .minimumScaleFactor(0.78)
+                        Spacer(minLength: 0)
                     }
-                    .frame(maxWidth: .infinity, minHeight: 70, alignment: .leading)
-                    .padding(13)
-                    .foregroundStyle(training.selectedPlayMode == mode ? Color(hex: "140800") : Color(hex: "FFF0C9"))
-                    .background(training.selectedPlayMode == mode ? Color(hex: "FFB347") : Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
-                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(training.selectedPlayMode == mode ? Color(hex: "FFD060") : Color(hex: "4B3720"), lineWidth: 1))
+                    .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
+                    .padding(.horizontal, 14)
+                    .foregroundStyle(training.selectedPlayMode == mode ? Color(hex: "FFF8E8") : Color(hex: "E5C98A"))
+                    .background(training.selectedPlayMode == mode ? Color(hex: "173247").opacity(0.96) : Color(hex: "0A1721").opacity(0.55), in: RoundedRectangle(cornerRadius: 18))
+                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(training.selectedPlayMode == mode ? modeAccent(mode) : Color(hex: "1B3344"), lineWidth: 1.2))
                 }
                 .disabled(training.isBusy)
-            }
-        }
-    }
-
-    private var emptyReportCard: some View {
-        SurfaceCard(stroke: Color(hex: "2B5870")) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(L10n.text("report_waiting_title", selectedLanguage))
-                    .font(.headline.bold())
-                    .foregroundStyle(Color(hex: "FFF6E5"))
-                Text(L10n.text("report_waiting_body", selectedLanguage))
-                    .font(.callout)
-                    .foregroundStyle(Color(hex: "DFFFF0"))
+                .opacity(training.isBusy ? 0.62 : 1)
             }
         }
     }
@@ -824,9 +782,42 @@ struct ContentView: View {
         return String(name.prefix(1)).uppercased()
     }
 
-    private func formatRemaining(_ millis: Int) -> String {
-        let seconds = max(0, Int(ceil(Double(millis) / 1_000.0)))
-        return "\(seconds)s"
+    private func remainingText() -> String {
+        let seconds = Double(max(0, training.remainingMillis)) / 1_000.0
+        let value = String(format: "%.1f", seconds)
+        return selectedLanguage == .chinese ? "剩余 \(value) 秒" : "Remaining \(value)s"
+    }
+
+    private func modeMarker(_ mode: TrainingPlayMode) -> String {
+        switch mode {
+        case .classic30:
+            return "●"
+        case .classic60:
+            return "◆"
+        case .burst10, .burst15:
+            return "▲"
+        case .levelChallenge:
+            return "★"
+        case .dailyChallenge:
+            return "✓"
+        }
+    }
+
+    private func modeAccent(_ mode: TrainingPlayMode) -> Color {
+        switch mode {
+        case .classic30:
+            return Color(hex: "FF9A30")
+        case .classic60:
+            return Color(hex: "FFB347")
+        case .burst10:
+            return Color(hex: "FFD060")
+        case .burst15:
+            return Color(hex: "FF9A30")
+        case .levelChallenge:
+            return Color(hex: "C084FC")
+        case .dailyChallenge:
+            return Color(hex: "E07010")
+        }
     }
 }
 
@@ -840,14 +831,11 @@ private struct BatteryBadge: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: "battery.75percent")
+            Image(systemName: "battery.25")
             Text(text)
                 .font(.caption.bold())
         }
-        .foregroundStyle(.white)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color.white.opacity(0.14), in: Capsule())
+        .foregroundStyle(Color(hex: "D8D0BE"))
     }
 }
 
@@ -942,6 +930,20 @@ private struct ActionButtonStyle: ButtonStyle {
             .padding(.vertical, 12)
             .background(color.opacity(configuration.isPressed ? 0.7 : 1), in: RoundedRectangle(cornerRadius: 12))
             .opacity(configuration.isPressed ? 0.85 : 1)
+    }
+}
+
+private struct PillTrainingButtonStyle: ButtonStyle {
+    let color: Color
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 16, weight: .black))
+            .foregroundStyle(Color(hex: "FFF2E6"))
+            .padding(.vertical, 15)
+            .background(color.opacity(configuration.isPressed ? 0.74 : 1), in: Capsule())
+            .overlay(Capsule().stroke(Color.white.opacity(0.18), lineWidth: 1))
+            .opacity(configuration.isPressed ? 0.86 : 1)
     }
 }
 
