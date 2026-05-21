@@ -58,12 +58,6 @@ struct ContentView: View {
                         .padding(.top, 50)
                         .padding(.bottom, 14)
 
-                    if !cloud.isActivated {
-                        activationCard
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 10)
-                    }
-
                     ScrollView(showsIndicators: false) {
                         pageBody
                             .padding(.horizontal, 28)
@@ -513,6 +507,9 @@ struct ContentView: View {
 
     private var profilePage: some View {
         VStack(spacing: 14) {
+            if !cloud.isActivated {
+                activationCard
+            }
             SurfaceCard(stroke: Color(hex: "8FD8FF")) {
                 HStack(spacing: 14) {
                     ZStack {
