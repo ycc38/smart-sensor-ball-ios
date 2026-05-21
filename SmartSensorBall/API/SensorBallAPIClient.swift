@@ -474,12 +474,50 @@ final class CloudStore: ObservableObject {
     }
 
     func fallbackAchievements() -> [CloudAchievementItem] {
-        [
-            CloudAchievementItem(key: "milestone_1", metric: "sessions", goal: 1, progress: min(1, statistics?.totalSessions ?? 0), unlocked: (statistics?.totalSessions ?? 0) >= 1, unlockedAt: nil, sortOrder: 1),
-            CloudAchievementItem(key: "hits_100", metric: "total_hits", goal: 100, progress: min(100, statistics?.totalHits ?? 0), unlocked: (statistics?.totalHits ?? 0) >= 100, unlockedAt: nil, sortOrder: 2),
-            CloudAchievementItem(key: "best_30_40", metric: "best_30", goal: 40, progress: min(40, statistics?.best30Hits ?? 0), unlocked: (statistics?.best30Hits ?? 0) >= 40, unlockedAt: nil, sortOrder: 3),
-            CloudAchievementItem(key: "burst_6", metric: "burst", goal: 6, progress: min(6, statistics?.bestBurstRecord ?? 0), unlocked: (statistics?.bestBurstRecord ?? 0) >= 6, unlockedAt: nil, sortOrder: 4),
-            CloudAchievementItem(key: "streak_3", metric: "streak", goal: 3, progress: min(3, statistics?.currentStreak ?? 0), unlocked: (statistics?.currentStreak ?? 0) >= 3, unlockedAt: nil, sortOrder: 5)
+        let sessions = statistics?.totalSessions ?? 0
+        let totalHits = statistics?.totalHits ?? 0
+        let best30 = statistics?.best30Hits ?? 0
+        let best60 = statistics?.best60Hits ?? 0
+        let burst = statistics?.bestBurstRecord ?? 0
+        let streak = statistics?.currentStreak ?? 0
+
+        func item(_ key: String, metric: String, goal: Int, progress: Int, order: Int) -> CloudAchievementItem {
+            CloudAchievementItem(
+                key: key,
+                metric: metric,
+                goal: goal,
+                progress: min(goal, progress),
+                unlocked: progress >= goal,
+                unlockedAt: nil,
+                sortOrder: order
+            )
+        }
+
+        return [
+            item("first_training", metric: "sessions", goal: 1, progress: sessions, order: 1),
+            item("sessions_5", metric: "sessions", goal: 5, progress: sessions, order: 2),
+            item("sessions_15", metric: "sessions", goal: 15, progress: sessions, order: 3),
+            item("sessions_30", metric: "sessions", goal: 30, progress: sessions, order: 4),
+            item("hits_100", metric: "total_hits", goal: 100, progress: totalHits, order: 5),
+            item("hits_500", metric: "total_hits", goal: 500, progress: totalHits, order: 6),
+            item("hits_1000", metric: "total_hits", goal: 1000, progress: totalHits, order: 7),
+            item("hits_5000", metric: "total_hits", goal: 5000, progress: totalHits, order: 8),
+            item("best_30_40", metric: "best_30", goal: 40, progress: best30, order: 9),
+            item("best_30_60", metric: "best_30", goal: 60, progress: best30, order: 10),
+            item("best_30_80", metric: "best_30", goal: 80, progress: best30, order: 11),
+            item("best_30_100", metric: "best_30", goal: 100, progress: best30, order: 12),
+            item("best_60_90", metric: "best_60", goal: 90, progress: best60, order: 13),
+            item("best_60_120", metric: "best_60", goal: 120, progress: best60, order: 14),
+            item("best_60_150", metric: "best_60", goal: 150, progress: best60, order: 15),
+            item("best_60_180", metric: "best_60", goal: 180, progress: best60, order: 16),
+            item("burst_6", metric: "burst", goal: 6, progress: burst, order: 17),
+            item("burst_10", metric: "burst", goal: 10, progress: burst, order: 18),
+            item("burst_12", metric: "burst", goal: 12, progress: burst, order: 19),
+            item("burst_15", metric: "burst", goal: 15, progress: burst, order: 20),
+            item("streak_3", metric: "streak", goal: 3, progress: streak, order: 21),
+            item("streak_7", metric: "streak", goal: 7, progress: streak, order: 22),
+            item("streak_14", metric: "streak", goal: 14, progress: streak, order: 23),
+            item("streak_30", metric: "streak", goal: 30, progress: streak, order: 24)
         ]
     }
 
