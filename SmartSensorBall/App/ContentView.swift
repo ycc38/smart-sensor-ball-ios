@@ -151,6 +151,8 @@ struct ContentView: View {
                     .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
             }
             .accessibilityLabel(L10n.text("settings", selectedLanguage))
+            .disabled(training.isBusy)
+            .opacity(training.isBusy ? 0.5 : 1.0)
         }
     }
 
@@ -275,7 +277,7 @@ struct ContentView: View {
                             Text(training.countdownText)
                                 .font(.system(size: 52, weight: .black))
                                 .foregroundStyle(Color(hex: "FFF6E5"))
-                            Text(training.statusText(language: selectedLanguage))
+                            Text(cloud.isActivated ? training.statusText(language: selectedLanguage) : L10n.text("activation_required", selectedLanguage))
                                 .font(.headline)
                                 .foregroundStyle(Color(hex: "FFD060"))
                             Text(formatRemaining(training.remainingMillis))
@@ -299,19 +301,19 @@ struct ContentView: View {
                     }
                     HStack(spacing: 12) {
                         Button {
-                            Task { await training.start() }
+                            Task { await training.start(isActivated: cloud.isActivated) }
                         } label: {
                             Label(L10n.text("start", selectedLanguage), systemImage: "play.fill")
                         }
                         .buttonStyle(ActionButtonStyle(color: Color(hex: "008840")))
-                        .disabled(training.isRunning || !bluetooth.isConnected)
+                        .disabled(training.isBusy || !bluetooth.isConnected || !cloud.isActivated)
                         Button {
                             Task { await training.stop() }
                         } label: {
                             Label(L10n.text("end", selectedLanguage), systemImage: "stop.fill")
                         }
                         .buttonStyle(ActionButtonStyle(color: Color(hex: "783333")))
-                        .disabled(!training.isRunning)
+                        .disabled(!training.isBusy)
                     }
                 }
             }
@@ -344,6 +346,7 @@ struct ContentView: View {
                     .background(training.selectedPlayMode == mode ? Color(hex: "FFB347") : Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
                     .overlay(RoundedRectangle(cornerRadius: 14).stroke(training.selectedPlayMode == mode ? Color(hex: "FFD060") : Color(hex: "4B3720"), lineWidth: 1))
                 }
+                .disabled(training.isBusy)
             }
         }
     }
@@ -746,12 +749,63 @@ struct ContentView: View {
     }
 
     private func achievementImageName(_ key: String) -> String {
-        if key.contains("best_30") { return "achievement_best30_05" }
-        if key.contains("best_60") { return "achievement_best60_09" }
-        if key.contains("burst") { return "achievement_burst_13" }
-        if key.contains("streak") { return "achievement_streak_17" }
-        if key.contains("hits") { return "achievement_hits_01" }
-        return "achievement_milestone_01"
+        switch key {
+        case "first_training":
+            return "achievement_milestone_01"
+        case "sessions_5":
+            return "achievement_milestone_02"
+        case "sessions_15":
+            return "achievement_milestone_03"
+        case "sessions_30":
+            return "achievement_milestone_04"
+        case "hits_100":
+            return "achievement_hits_01"
+        case "hits_500":
+            return "achievement_hits_02"
+        case "hits_1000":
+            return "achievement_hits_03"
+        case "hits_5000":
+            return "achievement_hits_04"
+        case "best_30_40":
+            return "achievement_best30_05"
+        case "best_30_60":
+            return "achievement_best30_06"
+        case "best_30_80":
+            return "achievement_best30_07"
+        case "best_30_100":
+            return "achievement_best30_08"
+        case "best_60_90":
+            return "achievement_best60_09"
+        case "best_60_120":
+            return "achievement_best60_10"
+        case "best_60_150":
+            return "achievement_best60_11"
+        case "best_60_180":
+            return "achievement_best60_12"
+        case "burst_6":
+            return "achievement_burst_13"
+        case "burst_10":
+            return "achievement_burst_14"
+        case "burst_12":
+            return "achievement_burst_15"
+        case "burst_15":
+            return "achievement_burst_16"
+        case "streak_3":
+            return "achievement_streak_17"
+        case "streak_7":
+            return "achievement_streak_18"
+        case "streak_14":
+            return "achievement_streak_19"
+        case "streak_30":
+            return "achievement_streak_20"
+        default:
+            if key.contains("best_30") { return "achievement_best30_05" }
+            if key.contains("best_60") { return "achievement_best60_09" }
+            if key.contains("burst") { return "achievement_burst_13" }
+            if key.contains("streak") { return "achievement_streak_17" }
+            if key.contains("hits") { return "achievement_hits_01" }
+            return "achievement_milestone_01"
+        }
     }
 
     private func tierName(_ key: String?, fallbackLevel: Int) -> String {

@@ -177,6 +177,10 @@ final class TrainingManager: ObservableObject {
         L10n.text(statusKey, language)
     }
 
+    var isBusy: Bool {
+        phase == .countdown || phase == .running
+    }
+
     func modeTitle(language: AppLanguage) -> String {
         L10n.text(selectedPlayMode.titleKey, language)
     }
@@ -208,8 +212,13 @@ final class TrainingManager: ObservableObject {
         return "XP \(trainingXP) | Lv.\(trainingLevel) | \(L10n.text("streak", language)) \(currentStreak)"
     }
 
-    func start() async {
-        guard !isRunning else {
+    func start(isActivated: Bool = true) async {
+        guard !isBusy else {
+            return
+        }
+        guard isActivated else {
+            phase = .error
+            statusKey = "activation_required"
             return
         }
         guard let bluetoothManager = bluetoothManager, bluetoothManager.isConnected else {
@@ -224,6 +233,7 @@ final class TrainingManager: ObservableObject {
         let levelBefore = trainingLevel
         hitTimes.removeAll()
         bluetoothManager.resetDisplayHitCount()
+        isRunning = false
         realTimeHits = 0
         remainingMillis = sessionMode.durationSeconds * 1_000
         latestReport = nil
@@ -257,6 +267,7 @@ final class TrainingManager: ObservableObject {
             while !Task.isCancelled {
                 let elapsedMs = Int(Date().timeIntervalSince(start) * 1_000)
                 if elapsedMs >= durationMs {
+                    self.realTimeHits = max(0, bluetoothManager.displayHitCount)
                     self.finish(
                         mode: sessionMode,
                         playMode: sessionPlayMode,
@@ -294,7 +305,7 @@ final class TrainingManager: ObservableObject {
         isRunning = false
         phase = .finished
         statusKey = "stopped"
-        countdownText = "DONE"
+        countdownText = "--"
     }
 
     private func finish(

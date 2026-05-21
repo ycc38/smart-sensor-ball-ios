@@ -178,9 +178,11 @@ struct CloudSoundEffect: Codable, Equatable, Identifiable {
     }
 
     static let bundled: [CloudSoundEffect] = [
-        CloudSoundEffect(id: "arena_thunder", nameZh: "竞技雷鸣", nameEn: "Arena Thunder", descriptionZh: "厚重拳击音效", descriptionEn: "Heavy punch impact", style: "impact", bpm: 95, durationMs: 600, url: ""),
-        CloudSoundEffect(id: "street_spark", nameZh: "街头火花", nameEn: "Street Spark", descriptionZh: "短促清脆反馈", descriptionEn: "Short crisp hit", style: "spark", bpm: 110, durationMs: 420, url: ""),
-        CloudSoundEffect(id: "iron_hook", nameZh: "铁拳摆击", nameEn: "Iron Hook", descriptionZh: "金属质感击打", descriptionEn: "Metallic hook strike", style: "metal", bpm: 88, durationMs: 520, url: "")
+        CloudSoundEffect(id: "sensorball_punch_arena_thunder", nameZh: "赛场雷击", nameEn: "Arena Thunder", descriptionZh: "厚重冲击音效，适合标准训练。", descriptionEn: "Heavy impact sound for standard training.", style: "heavy", bpm: 100, durationMs: 460, url: "asset://SFX/01_sensorball_punch_arena_thunder.wav"),
+        CloudSoundEffect(id: "sensorball_punch_street_spark", nameZh: "街头火花", nameEn: "Street Spark", descriptionZh: "清脆明亮音效，适合快速击打。", descriptionEn: "Bright punch sound for fast hits.", style: "street", bpm: 110, durationMs: 460, url: "asset://SFX/02_sensorball_punch_street_spark.wav"),
+        CloudSoundEffect(id: "sensorball_punch_iron_hook", nameZh: "铁拳冲击", nameEn: "Iron Hook", descriptionZh: "金属质感音效，适合力量训练。", descriptionEn: "Metallic punch sound for power work.", style: "metal", bpm: 95, durationMs: 460, url: "asset://SFX/03_sensorball_punch_iron_hook.wav"),
+        CloudSoundEffect(id: "sensorball_punch_neon_jab", nameZh: "霓虹快拳", nameEn: "Neon Jab", descriptionZh: "轻快短促音效，适合节奏训练。", descriptionEn: "Snappy punch sound for rhythm training.", style: "fast", bpm: 120, durationMs: 460, url: "asset://SFX/04_sensorball_punch_neon_jab.wav"),
+        CloudSoundEffect(id: "sensorball_punch_bass_smash", nameZh: "低频重锤", nameEn: "Bass Smash", descriptionZh: "低频厚实音效，适合重击反馈。", descriptionEn: "Deep punch sound for heavy feedback.", style: "bass", bpm: 90, durationMs: 460, url: "asset://SFX/05_sensorball_punch_bass_smash.wav")
     ]
 }
 
@@ -534,6 +536,17 @@ final class SoundEffectManager: ObservableObject {
     private var hitPlayer: AVPlayer?
     private var selectedURL: String = UserDefaults.standard.string(forKey: "selected_sound_effect_url") ?? ""
 
+    init() {
+        if selectedURL.isEmpty, let effect = bundledFallbackForSelection() {
+            selectedEffectId = effect.id
+            selectedEffectName = effect.nameEn
+            selectedURL = effect.url
+            UserDefaults.standard.set(effect.id, forKey: "selected_sound_effect_id")
+            UserDefaults.standard.set(effect.nameEn, forKey: "selected_sound_effect_name")
+            UserDefaults.standard.set(effect.url, forKey: "selected_sound_effect_url")
+        }
+    }
+
     func apply(_ effect: CloudSoundEffect, language: AppLanguage) {
         selectedEffectId = effect.id
         selectedEffectName = effect.name(language: language)
@@ -546,7 +559,7 @@ final class SoundEffectManager: ObservableObject {
 
     func preview(_ effect: CloudSoundEffect, language: AppLanguage) {
         previewPlayer?.pause()
-        guard let url = URL(string: effect.url), !effect.url.isEmpty else {
+        guard let url = mediaURL(from: effect.url) else {
             previewStatus = "\(effect.name(language: language)) selected"
             AudioServicesPlaySystemSound(1104)
             return
@@ -562,12 +575,62 @@ final class SoundEffectManager: ObservableObject {
     }
 
     func playHit(forceN: Int) {
-        if let url = URL(string: selectedURL), !selectedURL.isEmpty {
+        let urlString = selectedURL.isEmpty ? bundledFallbackForSelection()?.url ?? "" : selectedURL
+        if let url = mediaURL(from: urlString) {
             hitPlayer = AVPlayer(url: url)
+            hitPlayer?.volume = volume(for: forceN)
             hitPlayer?.play()
         } else {
             AudioServicesPlaySystemSound(forceN > 150 ? 1152 : 1104)
         }
+    }
+
+    private func mediaURL(from urlString: String) -> URL? {
+        guard !urlString.isEmpty else {
+            return nil
+        }
+        if urlString.hasPrefix("asset://") {
+            let assetPath = String(urlString.dropFirst("asset://".count))
+            let fileName = (assetPath as NSString).lastPathComponent
+            let subdirectory = (assetPath as NSString).deletingLastPathComponent
+            let resourceName = (fileName as NSString).deletingPathExtension
+            let fileExtension = (fileName as NSString).pathExtension
+            let extensionValue: String? = fileExtension.isEmpty ? nil : fileExtension
+            if let url = Bundle.main.url(
+                forResource: resourceName,
+                withExtension: extensionValue,
+                subdirectory: subdirectory.isEmpty ? nil : subdirectory
+            ) {
+                return url
+            }
+            if subdirectory.lowercased() == "sfx" {
+                return Bundle.main.url(forResource: resourceName, withExtension: extensionValue, subdirectory: "SFX")
+            }
+            return Bundle.main.url(forResource: resourceName, withExtension: extensionValue)
+        }
+        return URL(string: urlString)
+    }
+
+    private func bundledFallbackForSelection() -> CloudSoundEffect? {
+        if let effect = CloudSoundEffect.bundled.first(where: { $0.id == selectedEffectId }) {
+            return effect
+        }
+        switch selectedEffectId {
+        case "arena_thunder":
+            return CloudSoundEffect.bundled.first(where: { $0.id == "sensorball_punch_arena_thunder" })
+        case "street_spark":
+            return CloudSoundEffect.bundled.first(where: { $0.id == "sensorball_punch_street_spark" })
+        case "iron_hook":
+            return CloudSoundEffect.bundled.first(where: { $0.id == "sensorball_punch_iron_hook" })
+        default:
+            return CloudSoundEffect.bundled.first
+        }
+    }
+
+    private func volume(for forceN: Int) -> Float {
+        if forceN >= 70 { return 1.0 }
+        if forceN >= 30 { return 0.82 }
+        return 0.66
     }
 }
 

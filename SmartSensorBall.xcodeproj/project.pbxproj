@@ -18,6 +18,7 @@
 		A00000000000000000000009 /* SensorBallAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000109 /* SensorBallAPIClient.swift */; };
 		A00000000000000000000010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000120 /* Assets.xcassets */; };
 		A00000000000000000000011 /* Legal in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000122 /* Legal */; };
+		A00000000000000000000012 /* SFX in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000123 /* SFX */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,7 @@
 		A00000000000000000000120 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SmartSensorBall/Resources/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		A00000000000000000000121 /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Resources; sourceTree = "<group>"; };
 		A00000000000000000000122 /* Legal */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SmartSensorBall/Resources/Legal; sourceTree = SOURCE_ROOT; };
+		A00000000000000000000123 /* SFX */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SmartSensorBall/Resources/SFX; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -177,6 +179,7 @@
 			files = (
 				A00000000000000000000010 /* Assets.xcassets in Resources */,
 				A00000000000000000000011 /* Legal in Resources */,
+				A00000000000000000000012 /* SFX in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
