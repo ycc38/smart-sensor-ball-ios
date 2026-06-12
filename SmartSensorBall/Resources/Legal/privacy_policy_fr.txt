@@ -11,6 +11,8 @@ Données d'entraînement : mode, durée, nombre de frappes, fréquence moyenne, 
 Données de profil : pseudo, avatar, langue, région et informations d'affichage.
 Données techniques : version de l'application, modèle de l'appareil, version du système, état des requêtes, erreurs et journaux nécessaires.
 
+Les données d'entraînement sont d'abord enregistrées localement sur votre appareil. Avant le premier envoi des scores d'entraînement vers la synchronisation cloud ou les classements mondiaux, l'application demande votre consentement. Si vous acceptez, le score, le mode d'entraînement, le pseudo ou l'identifiant d'appareil masqué, le niveau et les identifiants de service nécessaires sont envoyés au cloud Smart sensor ball. Si vous refusez, l'entraînement Bluetooth local et les enregistrements locaux restent disponibles.
+
 3. Autorisations
 Les autorisations Bluetooth servent à rechercher, connecter et recevoir les données du ballon de boxe intelligent.
 Certaines versions d'Android exigent une autorisation liée à la localisation pour la recherche Bluetooth. Nous ne l'utilisons pas pour suivre votre position.
@@ -18,13 +20,13 @@ Le réseau sert à synchroniser les entraînements, succès, classements et prof
 L'accès aux images sert uniquement au choix d'un avatar ou à l'enregistrement/partage d'images.
 
 4. Partage et affichage
-Nous ne vendons pas vos données personnelles. Les données nécessaires peuvent être traitées par nos systèmes pour fournir la synchronisation, les succès, les classements et l'exploitation du service. Le pseudo, l'avatar, le rang et le score peuvent être affichés dans les classements.
+Nous ne vendons pas vos données personnelles. Les données nécessaires peuvent être traitées par nos systèmes pour fournir la synchronisation, les succès, les classements et l'exploitation du service. Le pseudo, l'avatar, le rang et le score ne peuvent être affichés dans les classements qu'après votre consentement à l'envoi des données de classement.
 
 5. Stockage et sécurité
 Certains réglages, le dernier appareil Bluetooth connecté, le cache d'avatar et l'état local sont stockés sur votre appareil. Les entraînements, succès, classements et résumés de profil peuvent être stockés sur nos serveurs. Nous appliquons des mesures de sécurité raisonnables, mais aucun environnement Internet ou Bluetooth n'est absolument sûr.
 
 6. Vos droits
-Vous pouvez consulter et modifier certaines informations de profil dans l'application. Vous pouvez nous contacter pour demander conseil, correction ou suppression lorsque la loi et la sécurité du produit le permettent.
+Vous pouvez consulter et modifier certaines informations de profil dans l'application. Vous pouvez nous contacter pour demander conseil, correction, suppression ou retrait de l'affichage dans les classements lorsque la loi et la sécurité du produit le permettent.
 
 7. Mineurs
 Les mineurs doivent utiliser ce produit sous la supervision d'un tuteur.

@@ -45,6 +45,9 @@ struct ContentView: View {
     @State private var profileName = ""
     @State private var profileColor = "#145DA0"
     @State private var shareItems: [Any]?
+    @State private var pendingCloudUploadReport: TrainingReport?
+    @State private var showingLeaderboardConsent = false
+    @AppStorage("leaderboard_upload_consent_v1") private var leaderboardUploadConsent = false
 
     var body: some View {
         NavigationView {
@@ -95,6 +98,21 @@ struct ContentView: View {
             } message: {
                 Text(L10n.text("first_use_message", selectedLanguage))
             }
+            .alert(Text(L10n.text("leaderboard_consent_title", selectedLanguage)), isPresented: $showingLeaderboardConsent) {
+                Button(L10n.text("leaderboard_consent_decline", selectedLanguage), role: .cancel) {
+                    pendingCloudUploadReport = nil
+                    cloud.statusMessage = L10n.text("leaderboard_consent_declined_status", selectedLanguage)
+                }
+                Button(L10n.text("leaderboard_consent_accept", selectedLanguage)) {
+                    leaderboardUploadConsent = true
+                    if let report = pendingCloudUploadReport {
+                        pendingCloudUploadReport = nil
+                        Task { await cloud.upload(report: report, language: selectedLanguage) }
+                    }
+                }
+            } message: {
+                Text(L10n.text("leaderboard_consent_message", selectedLanguage))
+            }
             .onAppear {
                 selectedLanguage = AppLanguage.current
                 profileName = cloud.profile?.nickname ?? ""
@@ -119,7 +137,13 @@ struct ContentView: View {
             }
             .onChange(of: training.latestReport) { report in
                 guard let report = report else { return }
-                Task { await cloud.upload(report: report, language: selectedLanguage) }
+                guard cloud.isActivated else { return }
+                if leaderboardUploadConsent {
+                    Task { await cloud.upload(report: report, language: selectedLanguage) }
+                } else {
+                    pendingCloudUploadReport = report
+                    showingLeaderboardConsent = true
+                }
             }
         }
         .navigationViewStyle(.stack)

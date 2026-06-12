@@ -8,6 +8,7 @@ struct SettingsView: View {
     @Binding var language: AppLanguage
     @State private var showingLegal: LegalDocument?
     @State private var showingDeveloperInfo = false
+    @AppStorage("leaderboard_upload_consent_v1") private var leaderboardUploadConsent = false
 
     var body: some View {
         NavigationView {
@@ -16,6 +17,7 @@ struct SettingsView: View {
                     bluetoothCard
                     soundEffectCard
                     languageCard
+                    privacyCard
                     developerCard
                 }
                 .padding(18)
@@ -183,6 +185,27 @@ struct SettingsView: View {
                 .onChange(of: language) { newValue in
                     newValue.save()
                 }
+            }
+        }
+    }
+
+    private var privacyCard: some View {
+        SettingsCard(stroke: Color(hex: "00C9A7")) {
+            VStack(alignment: .leading, spacing: 12) {
+                settingsSectionHeader(
+                    title: L10n.text("leaderboard_upload_setting", language),
+                    subtitle: L10n.text("leaderboard_upload_setting_hint", language),
+                    color: Color(hex: "8FFFE4")
+                )
+                Toggle(isOn: $leaderboardUploadConsent) {
+                    Text(L10n.text("leaderboard_upload_toggle", language))
+                        .font(.headline)
+                        .foregroundStyle(Color(hex: "FFF6E5"))
+                }
+                .toggleStyle(SwitchToggleStyle(tint: Color(hex: "00A85A")))
+                Text(leaderboardUploadConsent ? L10n.text("leaderboard_upload_enabled", language) : L10n.text("leaderboard_upload_disabled", language))
+                    .font(.caption.bold())
+                    .foregroundStyle(Color(hex: "DFFFF0"))
             }
         }
     }

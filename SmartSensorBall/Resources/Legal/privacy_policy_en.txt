@@ -7,7 +7,8 @@ Smart sensor ball is a smart boxing product companion app provided by Shaoxing W
 
 2. Information We Process
 Bluetooth device data: device name, device address, connection status, battery level, and boxing count from SENBALL# devices. This is used for scanning, connection, automatic reconnection, battery display, and training count.
-Training data: mode, duration, boxing count, average frequency, best burst, accumulated hits, sessions, streaks, achievements, ranks, and leaderboard results.
+Training data: mode, duration, boxing count, average frequency, best burst, accumulated hits, sessions, streaks, achievements, ranks, and leaderboard results. Training data is first recorded locally on your device.
+Before the app uploads training scores to cloud sync or global leaderboards for the first time, it asks for your consent in the app. Only after you agree will training score, mode, nickname or masked device ID, tier, and necessary app/device service identifiers be uploaded to the Smart sensor ball cloud. If you do not agree, local Bluetooth training and local records remain available.
 Profile data: nickname, avatar, language, region, and display information used in the app and leaderboards.
 Technical data: app version, device model, system version, network request status, errors, and necessary logs for troubleshooting and service security.
 
@@ -18,13 +19,13 @@ Network permission is used for training sync, achievements, leaderboards, and pr
 Image access is used only when you choose an avatar or save/share images.
 
 4. Sharing and Disclosure
-We do not sell your personal information. Necessary data may be processed within our service systems to provide sync, achievements, leaderboards, and operations. Leaderboard nickname, avatar, rank, and score are displayed as part of the product feature.
+We do not sell your personal information. Necessary data may be processed within our service systems to provide sync, achievements, leaderboards, and operations. Only after you agree to leaderboard upload may leaderboard nickname, avatar, rank, and score be displayed as part of the product feature.
 
 5. Storage and Security
 Some settings, the last connected Bluetooth device, avatar cache, and local status are stored on your device. Training records, achievements, leaderboards, and profile summaries may be stored on cloud servers. We use reasonable security measures, but no Internet or Bluetooth environment is absolutely secure.
 
 6. Your Rights
-You may view and edit certain profile information in the app. You may contact us to request consultation, correction, or deletion where permitted by law and product safety requirements.
+You may view and edit certain profile information in the app. You may contact us to request consultation, correction, deletion, or removal from leaderboard display where permitted by law and product safety requirements.
 
 7. Minors
 Minors should use this product under guardian guidance.
