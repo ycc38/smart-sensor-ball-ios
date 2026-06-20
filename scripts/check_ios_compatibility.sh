@@ -24,7 +24,13 @@ xcodebuild \
   -configuration "$CONFIGURATION" \
   -showBuildSettings > "$BUILD_SETTINGS_FILE"
 
-DEPLOYMENT_TARGETS="$(awk -F= '/IPHONEOS_DEPLOYMENT_TARGET/ { gsub(/[[:space:]]/, "", $2); print $2 }' "$BUILD_SETTINGS_FILE" | sort -u)"
+DEPLOYMENT_TARGETS="$(awk -F= '
+  $1 ~ /^[[:space:]]*IPHONEOS_DEPLOYMENT_TARGET[[:space:]]*$/ {
+    value = $2
+    gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+    print value
+  }
+' "$BUILD_SETTINGS_FILE" | tr -d '\r' | sort -u)"
 if [ -z "$DEPLOYMENT_TARGETS" ]; then
   echo "No IPHONEOS_DEPLOYMENT_TARGET found in build settings."
   exit 1
@@ -35,7 +41,13 @@ if [ "$DEPLOYMENT_TARGETS" != "$MIN_IOS" ]; then
   exit 1
 fi
 
-DEVICE_FAMILIES="$(awk -F= '/TARGETED_DEVICE_FAMILY/ { gsub(/[[:space:]]/, "", $2); print $2 }' "$BUILD_SETTINGS_FILE" | sort -u)"
+DEVICE_FAMILIES="$(awk -F= '
+  $1 ~ /^[[:space:]]*TARGETED_DEVICE_FAMILY[[:space:]]*$/ {
+    value = $2
+    gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+    print value
+  }
+' "$BUILD_SETTINGS_FILE" | tr -d '\r' | sort -u)"
 if [ "$DEVICE_FAMILIES" != "1" ]; then
   echo "Expected TARGETED_DEVICE_FAMILY=1 for iPhone-only support, got: ${DEVICE_FAMILIES:-<empty>}"
   exit 1
