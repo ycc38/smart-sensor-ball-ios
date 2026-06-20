@@ -169,6 +169,18 @@ struct CloudSoundEffect: Codable, Equatable, Identifiable {
     let durationMs: Int
     let url: String
 
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case nameZh = "name_zh"
+        case nameEn = "name_en"
+        case descriptionZh = "description_zh"
+        case descriptionEn = "description_en"
+        case style
+        case bpm
+        case durationMs = "duration_ms"
+        case url
+    }
+
     func name(language: AppLanguage) -> String {
         language == .chinese ? nameZh : nameEn
     }
@@ -193,6 +205,15 @@ struct CloudSoundEffectCatalog: Codable {
     let version: Int?
     let updatedAt: String?
     let items: [CloudSoundEffect]?
+
+    private enum CodingKeys: String, CodingKey {
+        case status
+        case success
+        case message
+        case version
+        case updatedAt = "updated_at"
+        case items
+    }
 
     var isOK: Bool { status == "ok" || success == true }
 }
@@ -570,11 +591,12 @@ final class SoundEffectManager: ObservableObject {
     @Published var selectedEffectName: String = UserDefaults.standard.string(forKey: "selected_sound_effect_name") ?? "Arena Thunder"
     @Published var previewStatus: String = ""
 
-    private var previewPlayer: AVPlayer?
-    private var hitPlayer: AVPlayer?
+    private var previewPlayer: AVAudioPlayer?
+    private var hitPlayers: [AVAudioPlayer] = []
     private var selectedURL: String = UserDefaults.standard.string(forKey: "selected_sound_effect_url") ?? ""
 
     init() {
+        configureAudioSession()
         if selectedURL.isEmpty, let effect = bundledFallbackForSelection() {
             selectedEffectId = effect.id
             selectedEffectName = effect.nameEn
@@ -596,31 +618,60 @@ final class SoundEffectManager: ObservableObject {
     }
 
     func preview(_ effect: CloudSoundEffect, language: AppLanguage) {
-        previewPlayer?.pause()
+        previewPlayer?.stop()
         guard let url = mediaURL(from: effect.url) else {
             previewStatus = "\(effect.name(language: language)) selected"
             AudioServicesPlaySystemSound(1104)
             return
         }
-        previewPlayer = AVPlayer(url: url)
-        previewPlayer?.play()
-        previewStatus = effect.name(language: language)
+        do {
+            let player = try preparedPlayer(for: url)
+            previewPlayer = player
+            player.play()
+            previewStatus = effect.name(language: language)
+        } catch {
+            previewStatus = "\(effect.name(language: language)) selected"
+            AudioServicesPlaySystemSound(1104)
+        }
     }
 
     func stopPreview() {
-        previewPlayer?.pause()
+        previewPlayer?.stop()
         previewPlayer = nil
     }
 
     func playHit(forceN: Int) {
         let urlString = selectedURL.isEmpty ? bundledFallbackForSelection()?.url ?? "" : selectedURL
         if let url = mediaURL(from: urlString) {
-            hitPlayer = AVPlayer(url: url)
-            hitPlayer?.volume = volume(for: forceN)
-            hitPlayer?.play()
+            do {
+                hitPlayers.removeAll { !$0.isPlaying }
+                let player = try preparedPlayer(for: url)
+                player.volume = volume(for: forceN)
+                hitPlayers.append(player)
+                player.play()
+            } catch {
+                AudioServicesPlaySystemSound(forceN > 150 ? 1152 : 1104)
+            }
         } else {
             AudioServicesPlaySystemSound(forceN > 150 ? 1152 : 1104)
         }
+    }
+
+    private func configureAudioSession() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try session.setActive(true)
+        } catch {
+            // System fallback sounds still work if the app cannot take an audio session.
+        }
+    }
+
+    private func preparedPlayer(for url: URL) throws -> AVAudioPlayer {
+        configureAudioSession()
+        let player = try AVAudioPlayer(contentsOf: url)
+        player.prepareToPlay()
+        return player
     }
 
     private func mediaURL(from urlString: String) -> URL? {
