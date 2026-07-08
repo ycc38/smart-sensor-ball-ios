@@ -236,8 +236,12 @@ enum LeaderboardBoard: String, CaseIterable, Identifiable {
     }
 }
 
+private enum AppAPIConfig {
+    static let baseURL = URL(string: "https://sensorball.86086.cn/sensorball")!
+}
+
 struct SensorBallAPIClient {
-    let baseURL = URL(string: "http://152.136.62.157/sensorball")!
+    let baseURL = AppAPIConfig.baseURL
     private let session: URLSession = .shared
 
     func activate(serial: String, code: String, installId: String, deviceHash: String, appVersion: String) async throws -> ActivationApiResult {
