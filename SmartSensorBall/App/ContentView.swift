@@ -78,7 +78,6 @@ struct ContentView: View {
                 SettingsView(language: $selectedLanguage)
                     .environmentObject(bluetooth)
                     .environmentObject(cloud)
-                    .environmentObject(soundEffects)
             }
             .sheet(item: $showingLegal) { document in
                 LegalDocumentView(document: document, language: selectedLanguage)
@@ -125,7 +124,6 @@ struct ContentView: View {
                 }
                 Task {
                     await cloud.bootstrap(language: selectedLanguage)
-                    await cloud.refreshSoundEffects(language: selectedLanguage)
                     if cloud.isActivated {
                         await cloud.refreshLeaderboard(language: selectedLanguage)
                     }

@@ -3,7 +3,6 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var bluetooth: SensorBallBluetoothManager
     @EnvironmentObject private var cloud: CloudStore
-    @EnvironmentObject private var soundEffects: SoundEffectManager
     @Environment(\.dismiss) private var dismiss
     @Binding var language: AppLanguage
     @State private var showingLegal: LegalDocument?
@@ -15,7 +14,6 @@ struct SettingsView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     bluetoothCard
-                    soundEffectCard
                     languageCard
                     privacyCard
                     developerCard
@@ -39,9 +37,6 @@ struct SettingsView: View {
             }
         }
         .navigationViewStyle(.stack)
-        .onDisappear {
-            soundEffects.stopPreview()
-        }
     }
 
     private var bluetoothCard: some View {
@@ -116,57 +111,6 @@ struct SettingsView: View {
                             }
                         }
                     }
-                }
-            }
-        }
-    }
-
-    private var soundEffectCard: some View {
-        SettingsCard(stroke: Color(hex: "C084FC")) {
-            VStack(alignment: .leading, spacing: 12) {
-                settingsSectionHeader(
-                    title: L10n.text("cloud_sound_effects", language),
-                    subtitle: L10n.text("cloud_sound_effects_hint", language),
-                    color: Color(hex: "E7D7FF")
-                )
-                Button {
-                    Task { await cloud.refreshSoundEffects(language: language) }
-                } label: {
-                    Label(L10n.text("refresh_effects", language), systemImage: "arrow.clockwise")
-                }
-                .buttonStyle(SettingsActionStyle(color: Color(hex: "17354A")))
-
-                ForEach(cloud.soundEffects) { effect in
-                    HStack(spacing: 10) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(effect.name(language: language))
-                                .font(.headline)
-                                .foregroundStyle(Color(hex: "FFF6E5"))
-                            Text(effect.detail(language: language))
-                                .font(.caption)
-                                .foregroundStyle(Color(hex: "DFFFF0"))
-                        }
-                        Spacer()
-                        Button {
-                            soundEffects.preview(effect, language: language)
-                        } label: {
-                            Image(systemName: "speaker.wave.2.fill")
-                        }
-                        .buttonStyle(SettingsIconStyle())
-                        Button {
-                            soundEffects.apply(effect, language: language)
-                        } label: {
-                            Image(systemName: soundEffects.selectedEffectId == effect.id ? "checkmark.circle.fill" : "circle")
-                        }
-                        .buttonStyle(SettingsIconStyle())
-                    }
-                    .padding(12)
-                    .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 12))
-                }
-                if !soundEffects.previewStatus.isEmpty {
-                    Text(soundEffects.previewStatus)
-                        .font(.caption.bold())
-                        .foregroundStyle(Color(hex: "E7D7FF"))
                 }
             }
         }
@@ -282,14 +226,5 @@ private struct SettingsActionStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 11)
             .background(color.opacity(configuration.isPressed ? 0.65 : 1), in: RoundedRectangle(cornerRadius: 10))
-    }
-}
-
-private struct SettingsIconStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .foregroundStyle(Color(hex: "E7D7FF"))
-            .frame(width: 38, height: 38)
-            .background(Color.white.opacity(configuration.isPressed ? 0.15 : 0.08), in: RoundedRectangle(cornerRadius: 10))
     }
 }

@@ -591,33 +591,22 @@ final class CloudStore: ObservableObject {
 
 @MainActor
 final class SoundEffectManager: ObservableObject {
-    @Published var selectedEffectId: String = UserDefaults.standard.string(forKey: "selected_sound_effect_id") ?? CloudSoundEffect.bundled.first?.id ?? ""
-    @Published var selectedEffectName: String = UserDefaults.standard.string(forKey: "selected_sound_effect_name") ?? "Arena Thunder"
+    @Published var selectedEffectId: String = SoundEffectManager.fixedEffect.id
+    @Published var selectedEffectName: String = SoundEffectManager.fixedEffect.nameEn
     @Published var previewStatus: String = ""
 
+    private static let fixedEffect = CloudSoundEffect.bundled.first { $0.id == "sensorball_punch_arena_thunder" } ?? CloudSoundEffect.bundled[0]
     private var previewPlayer: AVAudioPlayer?
     private var hitPlayers: [AVAudioPlayer] = []
-    private var selectedURL: String = UserDefaults.standard.string(forKey: "selected_sound_effect_url") ?? ""
+    private var selectedURL: String = SoundEffectManager.fixedEffect.url
 
     init() {
         configureAudioSession()
-        if selectedURL.isEmpty, let effect = bundledFallbackForSelection() {
-            selectedEffectId = effect.id
-            selectedEffectName = effect.nameEn
-            selectedURL = effect.url
-            UserDefaults.standard.set(effect.id, forKey: "selected_sound_effect_id")
-            UserDefaults.standard.set(effect.nameEn, forKey: "selected_sound_effect_name")
-            UserDefaults.standard.set(effect.url, forKey: "selected_sound_effect_url")
-        }
+        applyFixedSelection(language: .english)
     }
 
-    func apply(_ effect: CloudSoundEffect, language: AppLanguage) {
-        selectedEffectId = effect.id
-        selectedEffectName = effect.name(language: language)
-        selectedURL = effect.url
-        UserDefaults.standard.set(effect.id, forKey: "selected_sound_effect_id")
-        UserDefaults.standard.set(selectedEffectName, forKey: "selected_sound_effect_name")
-        UserDefaults.standard.set(effect.url, forKey: "selected_sound_effect_url")
+    func apply(_ _: CloudSoundEffect, language: AppLanguage) {
+        applyFixedSelection(language: language)
         previewStatus = selectedEffectName
     }
 
@@ -645,7 +634,8 @@ final class SoundEffectManager: ObservableObject {
     }
 
     func playHit(forceN: Int) {
-        let urlString = selectedURL.isEmpty ? bundledFallbackForSelection()?.url ?? "" : selectedURL
+        applyFixedSelection(language: .english)
+        let urlString = selectedURL
         if let url = mediaURL(from: urlString) {
             do {
                 hitPlayers.removeAll { !$0.isPlaying }
@@ -659,6 +649,16 @@ final class SoundEffectManager: ObservableObject {
         } else {
             AudioServicesPlaySystemSound(forceN > 150 ? 1152 : 1104)
         }
+    }
+
+    private func applyFixedSelection(language: AppLanguage) {
+        let effect = Self.fixedEffect
+        selectedEffectId = effect.id
+        selectedEffectName = effect.name(language: language)
+        selectedURL = effect.url
+        UserDefaults.standard.set(effect.id, forKey: "selected_sound_effect_id")
+        UserDefaults.standard.set(selectedEffectName, forKey: "selected_sound_effect_name")
+        UserDefaults.standard.set(effect.url, forKey: "selected_sound_effect_url")
     }
 
     private func configureAudioSession() {
@@ -705,19 +705,7 @@ final class SoundEffectManager: ObservableObject {
     }
 
     private func bundledFallbackForSelection() -> CloudSoundEffect? {
-        if let effect = CloudSoundEffect.bundled.first(where: { $0.id == selectedEffectId }) {
-            return effect
-        }
-        switch selectedEffectId {
-        case "arena_thunder":
-            return CloudSoundEffect.bundled.first(where: { $0.id == "sensorball_punch_arena_thunder" })
-        case "street_spark":
-            return CloudSoundEffect.bundled.first(where: { $0.id == "sensorball_punch_street_spark" })
-        case "iron_hook":
-            return CloudSoundEffect.bundled.first(where: { $0.id == "sensorball_punch_iron_hook" })
-        default:
-            return CloudSoundEffect.bundled.first
-        }
+        Self.fixedEffect
     }
 
     private func volume(for forceN: Int) -> Float {
