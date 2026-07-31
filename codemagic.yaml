@@ -46,6 +46,7 @@ workflows:
         - code-signing
       vars:
         BUNDLE_ID: com.zclei.smartsensorball
+        APP_STORE_APPLE_ID: "6770832460"
     scripts:
       - name: Show Xcode version
         script: xcodebuild -version
@@ -60,6 +61,20 @@ workflows:
         script: keychain add-certificates
       - name: Apply App Store signing profiles
         script: xcode-project use-profiles --project "SmartSensorBall.xcodeproj"
+      - name: Set unique App Store build number
+        script: |
+          set -e
+          cd "$CM_BUILD_DIR"
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID")
+          case "$LATEST_BUILD_NUMBER" in
+            ""|*[!0-9]*)
+              echo "Could not determine the latest App Store build number: $LATEST_BUILD_NUMBER"
+              exit 1
+              ;;
+          esac
+          NEXT_BUILD_NUMBER=$((LATEST_BUILD_NUMBER + 1))
+          agvtool new-version -all "$NEXT_BUILD_NUMBER"
+          echo "Using App Store build number $NEXT_BUILD_NUMBER"
       - name: Build signed IPA
         script: xcode-project build-ipa --project "SmartSensorBall.xcodeproj" --scheme "SmartSensorBall"
     artifacts:
