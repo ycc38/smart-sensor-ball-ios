@@ -14,7 +14,6 @@ struct SmartSensorBallApp: App {
                 .environmentObject(bluetoothManager)
                 .environmentObject(trainingManager)
                 .environmentObject(cloudStore)
-                .environmentObject(soundEffectManager)
                 .environmentObject(speechCueService)
                 .onAppear {
                     trainingManager.attach(

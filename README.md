@@ -10,13 +10,18 @@ This directory contains the initial iOS source project for **Smart sensor ball**
   - Header: `D5 5D 03`
   - Packet size: 11 bytes
   - Byte 3: packet index
-  - Byte 4: battery
+  - Byte 4: data1 / battery level (`0...100`; legacy `101` charging and `102` full remain supported)
   - Byte 5: data2 / punch count
-  - Byte 7: data4 / peak
+  - Byte 6: data3 / charging flag (`0` not charging, `1` charging)
+  - Bytes 9-10: force in little-endian order
 - Gyroscope commands:
   - Connect success: `C5 5C 04 00`
   - Training start: `C5 5C 04 01`
   - Training end/stop: `C5 5C 04 00`
+- LED commands:
+  - Light off: `C5 5C 07 00`
+  - Light on and brightness: `C5 5C 07 01 XX` (`XX` is `0...99`; the app slider displays `0...100`)
+- The first bundled punch sound is preloaded locally; the app does not request cloud sound effects.
 - API base URL: `https://sensorball.86086.cn/sensorball/api/v1/`
 - Chinese, English, French, and Thai UI text
 - Privacy policy and user agreement assets

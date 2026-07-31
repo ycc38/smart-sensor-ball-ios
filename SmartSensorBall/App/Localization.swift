@@ -69,6 +69,12 @@ enum L10n {
         "battery": "Battery",
         "punch_count": "Punch Count",
         "peak_force": "Peak",
+        "light_control": "Light Control",
+        "light_control_hint": "Control the LED light after connecting the Smart sensor ball.",
+        "light_on": "Light On",
+        "light_off": "Light Off",
+        "light_brightness": "Brightness",
+        "light_connect_first": "Connect the Bluetooth device to control the light.",
 
         "activation_title": "Activation and Cloud Account",
         "activation_hint": "Enter the serial number and activation code that came with the physical Smart sensor ball hardware. Activation verifies hardware ownership and enables companion cloud features; no digital content is sold in the app.",
@@ -94,11 +100,6 @@ enum L10n {
         "document_unavailable": "This document is currently unavailable.",
         "developer_info": "Developer Info",
         "developer_info_hint": "Company, contact, version, and legal documents.",
-
-        "cloud_sound_effects": "Cloud Sound Effects",
-        "cloud_sound_effects_hint": "Preview and choose the punch sound played for training hits.",
-        "refresh_effects": "Refresh Effects",
-        "sound_effects_ready": "Sound effects ready.",
 
         "ready": "Ready to train",
         "countdown": "Starting soon",
@@ -202,6 +203,12 @@ enum L10n {
         "battery": "电量",
         "punch_count": "击打次数",
         "peak_force": "峰值",
+        "light_control": "灯光控制",
+        "light_control_hint": "连接 Smart sensor ball 后可控制 LED 灯光。",
+        "light_on": "灯光已打开",
+        "light_off": "灯光已关闭",
+        "light_brightness": "灯光亮度",
+        "light_connect_first": "连接蓝牙设备后才能控制灯光。",
 
         "activation_title": "激活与云端账号",
         "activation_hint": "请输入实体 Smart sensor ball 硬件随附的序列号和激活码。激活用于验证硬件使用资格并启用配套云端功能，App 内不销售数字内容。",
@@ -227,11 +234,6 @@ enum L10n {
         "document_unavailable": "当前文档暂不可用，请稍后重试。",
         "developer_info": "开发者信息",
         "developer_info_hint": "公司、联系方式、版本与法律文档。",
-
-        "cloud_sound_effects": "云端音效",
-        "cloud_sound_effects_hint": "试听并选择训练击打计数时播放的拳击音效。",
-        "refresh_effects": "刷新音效",
-        "sound_effects_ready": "音效已就绪。",
 
         "ready": "准备开始训练",
         "countdown": "即将开始",

@@ -23,7 +23,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Smart sensor ball uses Bluetooth to scan, connect, receive battery and punch-count data, and send gyroscope start/stop commands to your training device.</string>
+	<string>Smart sensor ball uses Bluetooth to scan and connect, receive battery, charging, and punch-count data, and control the gyroscope and LED light on your training device.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Bluetooth is required to connect to the Smart sensor ball training device.</string>
 	<key>NSLocalNetworkUsageDescription</key>

@@ -19,19 +19,27 @@ struct SensorBallTelemetry: Equatable {
     let packetIndex: Int
     let batteryRaw: Int
     let hitCount: Int
+    let chargingFlagRaw: Int
     let forceLow: Int
     let forceHigh: Int
     let forceN: Int
 
     var peak: Int { forceN }
 
-    var batteryText: String {
+    var batteryLevel: Int? {
         switch batteryRaw {
-        case 101: return "Charging"
-        case 102: return "Full"
-        case 0...100: return "\(batteryRaw)%"
-        default: return "--"
+        case 0...100: return batteryRaw
+        case 102: return 100
+        default: return nil
         }
+    }
+
+    var isCharging: Bool {
+        batteryRaw == 101 || (batteryLevel != nil && chargingFlagRaw == 1)
+    }
+
+    var batteryText: String {
+        batteryLevel.map { "\($0)%" } ?? (isCharging ? "" : "--")
     }
 }
 
@@ -45,6 +53,8 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     @Published var lastScanDebugText: String = ""
     @Published var displayHitCount: Int = 0
     @Published var peakForce: Int = 0
+    @Published private(set) var isLightOn = false
+    @Published private(set) var lightBrightness: Int
 
     private var central: CBCentralManager!
     private var notifyCharacteristics: [CBCharacteristic] = []
@@ -58,8 +68,13 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     private static let telemetryHeader: [UInt8] = [0xD5, 0x5D, 0x03]
     private static let commandOpenGyro = Data([0xC5, 0x5C, 0x04, 0x01])
     private static let commandCloseGyro = Data([0xC5, 0x5C, 0x04, 0x00])
+    private static let commandLightPrefix: [UInt8] = [0xC5, 0x5C, 0x07]
+    private static let lightBrightnessKey = "sensor_ball_light_brightness"
+    private static let defaultLightBrightness = 20
 
     override init() {
+        let storedBrightness = UserDefaults.standard.object(forKey: Self.lightBrightnessKey) as? Int
+        lightBrightness = min(max(storedBrightness ?? Self.defaultLightBrightness, 0), 100)
         super.init()
         central = CBCentralManager(delegate: self, queue: nil)
     }
@@ -103,8 +118,16 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
 
     func disconnect() {
         if let peripheral = connectedDevice?.peripheral {
-            central.cancelPeripheralConnection(peripheral)
+            let lightOffQueued = setLightEnabled(false)
+            if lightOffQueued {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                    self?.central.cancelPeripheralConnection(peripheral)
+                }
+            } else {
+                central.cancelPeripheralConnection(peripheral)
+            }
         }
+        isLightOn = false
         connectedDevice = nil
         writeCharacteristic = nil
         readableCharacteristics.removeAll()
@@ -120,15 +143,56 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
 
     @discardableResult
     func setGyroscopeEnabled(_ enabled: Bool) -> Bool {
+        let payload = enabled ? Self.commandOpenGyro : Self.commandCloseGyro
+        return writeCommand(payload, status: enabled ? "Gyroscope enabled" : "Gyroscope disabled")
+    }
+
+    @discardableResult
+    func setLightEnabled(_ enabled: Bool) -> Bool {
+        if !enabled {
+            isLightOn = false
+        }
+        guard connectedDevice != nil, writeCharacteristic != nil else {
+            if enabled {
+                statusText = "Connect Bluetooth before turning on the light"
+            }
+            return false
+        }
+
+        let payload: Data
+        if enabled {
+            let protocolBrightness = UInt8(min(lightBrightness, 99))
+            payload = Data(Self.commandLightPrefix + [0x01, protocolBrightness])
+        } else {
+            payload = Data(Self.commandLightPrefix + [0x00])
+        }
+        guard writeCommand(payload, status: enabled ? "Light enabled" : "Light disabled") else {
+            return false
+        }
+        isLightOn = enabled
+        return true
+    }
+
+    @discardableResult
+    func setLightBrightness(_ brightness: Int) -> Bool {
+        let clampedBrightness = min(max(brightness, 0), 100)
+        lightBrightness = clampedBrightness
+        UserDefaults.standard.set(clampedBrightness, forKey: Self.lightBrightnessKey)
+        guard isLightOn else {
+            return true
+        }
+        return setLightEnabled(true)
+    }
+
+    private func writeCommand(_ payload: Data, status: String) -> Bool {
         guard let connectedDevice = connectedDevice, let writeCharacteristic = writeCharacteristic else {
             statusText = "Bluetooth write channel unavailable"
             return false
         }
-        let payload = enabled ? Self.commandOpenGyro : Self.commandCloseGyro
         let type: CBCharacteristicWriteType =
             writeCharacteristic.properties.contains(.writeWithoutResponse) ? .withoutResponse : .withResponse
         connectedDevice.peripheral.writeValue(payload, for: writeCharacteristic, type: type)
-        statusText = enabled ? "Gyroscope enabled" : "Gyroscope disabled"
+        statusText = status
         return true
     }
 
@@ -193,6 +257,7 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
                 packetIndex: Int(bytes[index + 3]),
                 batteryRaw: Int(bytes[index + 4]),
                 hitCount: Int(bytes[index + 5]),
+                chargingFlagRaw: Int(bytes[index + 6]),
                 forceLow: forceLow,
                 forceHigh: forceHigh,
                 forceN: forceLow | (forceHigh << 8)
@@ -237,10 +302,13 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
             case .poweredOn:
                 statusText = "Bluetooth ready"
             case .poweredOff:
+                isLightOn = false
                 statusText = "Bluetooth is off"
             case .unauthorized:
+                isLightOn = false
                 statusText = "Bluetooth permission denied"
             default:
+                isLightOn = false
                 statusText = "Bluetooth unavailable"
             }
         }
@@ -293,6 +361,7 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
             writeCharacteristic = nil
             readableCharacteristics.removeAll()
             notifyCharacteristics.removeAll()
+            isLightOn = false
             statusText = "Connected. Discovering services..."
             peripheral.discoverServices(nil)
         }
@@ -304,6 +373,7 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
             writeCharacteristic = nil
             readableCharacteristics.removeAll()
             notifyCharacteristics.removeAll()
+            isLightOn = false
             statusText = "Bluetooth disconnected"
         }
     }
@@ -335,7 +405,9 @@ extension SensorBallBluetoothManager: CBPeripheralDelegate {
             if writeCharacteristic != nil {
                 statusText = "Bluetooth ready"
                 setGyroscopeEnabled(false)
+                setLightEnabled(false)
                 requestTelemetryRefresh(allowGyroscopeOffFallback: false)
+                statusText = "Bluetooth ready"
             }
         }
     }

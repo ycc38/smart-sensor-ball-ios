@@ -32,7 +32,6 @@ struct ContentView: View {
     @EnvironmentObject private var bluetooth: SensorBallBluetoothManager
     @EnvironmentObject private var training: TrainingManager
     @EnvironmentObject private var cloud: CloudStore
-    @EnvironmentObject private var soundEffects: SoundEffectManager
 
     @State private var selectedLanguage: AppLanguage = AppLanguage.current
     @State private var selectedPage: HomePage = .training
@@ -157,7 +156,7 @@ struct ContentView: View {
                     Image(systemName: "dot.radiowaves.left.and.right")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundStyle(bluetooth.isConnected ? Color(hex: "44FF88") : Color(hex: "FF5C5C"))
-                    BatteryBadge(text: bluetooth.telemetry?.batteryText ?? "--")
+                    BatteryBadge(telemetry: bluetooth.telemetry)
                 }
             }
             Spacer()
@@ -1304,15 +1303,36 @@ private struct AchievementGroup: Identifiable {
 }
 
 private struct BatteryBadge: View {
-    let text: String
+    let telemetry: SensorBallTelemetry?
 
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: "battery.25")
-            Text(text)
-                .font(.caption.bold())
+            Image(systemName: statusIcon)
+            if let text = telemetry?.batteryText, !text.isEmpty {
+                Text(text)
+                    .font(.caption.bold())
+            } else if telemetry == nil {
+                Text("--")
+                    .font(.caption.bold())
+            }
         }
         .foregroundStyle(Color(hex: "D8D0BE"))
+    }
+
+    private var statusIcon: String {
+        guard let telemetry else {
+            return "battery.0"
+        }
+        if telemetry.isCharging {
+            return "bolt.fill"
+        }
+        switch telemetry.batteryLevel ?? 0 {
+        case 76...100: return "battery.100"
+        case 51...75: return "battery.75"
+        case 26...50: return "battery.50"
+        case 1...25: return "battery.25"
+        default: return "battery.0"
+        }
     }
 }
 

@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Binding var language: AppLanguage
     @State private var showingLegal: LegalDocument?
     @State private var showingDeveloperInfo = false
+    @State private var lightBrightnessDraft = 20.0
     @AppStorage("leaderboard_upload_consent_v1") private var leaderboardUploadConsent = false
 
     var body: some View {
@@ -14,6 +15,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     bluetoothCard
+                    lightControlCard
                     languageCard
                     privacyCard
                     developerCard
@@ -37,6 +39,9 @@ struct SettingsView: View {
             }
         }
         .navigationViewStyle(.stack)
+        .onAppear {
+            lightBrightnessDraft = Double(bluetooth.lightBrightness)
+        }
     }
 
     private var bluetoothCard: some View {
@@ -75,7 +80,11 @@ struct SettingsView: View {
                 }
 
                 HStack(spacing: 10) {
-                    bluetoothMetric(label: L10n.text("battery", language), value: bluetooth.telemetry?.batteryText ?? "--")
+                    bluetoothMetric(
+                        label: L10n.text("battery", language),
+                        value: bluetooth.telemetry?.batteryText ?? "--",
+                        systemImage: bluetooth.telemetry?.isCharging == true ? "bolt.fill" : nil
+                    )
                     bluetoothMetric(label: L10n.text("punch_count", language), value: "\(bluetooth.displayHitCount)")
                     bluetoothMetric(label: L10n.text("peak_force", language), value: "\(bluetooth.peakForce)")
                 }
@@ -111,6 +120,66 @@ struct SettingsView: View {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private var lightControlCard: some View {
+        SettingsCard(stroke: Color(hex: "FFD060")) {
+            VStack(alignment: .leading, spacing: 14) {
+                settingsSectionHeader(
+                    title: L10n.text("light_control", language),
+                    subtitle: L10n.text("light_control_hint", language),
+                    color: Color(hex: "FFE58A")
+                )
+
+                Toggle(
+                    isOn: Binding(
+                        get: { bluetooth.isLightOn },
+                        set: { enabled in
+                            _ = bluetooth.setLightEnabled(enabled)
+                        }
+                    )
+                ) {
+                    Label(
+                        L10n.text(bluetooth.isLightOn ? "light_on" : "light_off", language),
+                        systemImage: bluetooth.isLightOn ? "lightbulb.fill" : "lightbulb"
+                    )
+                    .font(.headline)
+                    .foregroundStyle(Color(hex: "FFF6E5"))
+                }
+                .tint(Color(hex: "00C968"))
+                .disabled(!bluetooth.isConnected)
+
+                if bluetooth.isLightOn {
+                    VStack(spacing: 8) {
+                        HStack {
+                            Text(L10n.text("light_brightness", language))
+                                .font(.subheadline.bold())
+                                .foregroundStyle(Color(hex: "DFFFF0"))
+                            Spacer()
+                            Text("\(Int(lightBrightnessDraft.rounded()))%")
+                                .font(.subheadline.monospacedDigit().bold())
+                                .foregroundStyle(Color(hex: "FFD060"))
+                        }
+
+                        Slider(
+                            value: $lightBrightnessDraft,
+                            in: 0...100,
+                            step: 1,
+                            onEditingChanged: { isEditing in
+                                if !isEditing {
+                                    _ = bluetooth.setLightBrightness(Int(lightBrightnessDraft.rounded()))
+                                }
+                            }
+                        )
+                        .tint(Color(hex: "FFD060"))
+                    }
+                } else if !bluetooth.isConnected {
+                    Text(L10n.text("light_connect_first", language))
+                        .font(.caption)
+                        .foregroundStyle(Color(hex: "B9F8D0"))
                 }
             }
         }
@@ -181,16 +250,24 @@ struct SettingsView: View {
         }
     }
 
-    private func bluetoothMetric(label: String, value: String) -> some View {
+    private func bluetoothMetric(label: String, value: String, systemImage: String? = nil) -> some View {
         VStack(spacing: 4) {
             Text(label)
                 .font(.caption2.bold())
                 .foregroundStyle(Color(hex: "DFFFF0"))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-            Text(value)
-                .font(.headline.bold())
-                .foregroundStyle(Color(hex: "FFD060"))
+            HStack(spacing: 4) {
+                if let systemImage {
+                    Image(systemName: systemImage)
+                }
+                if !value.isEmpty {
+                    Text(value)
+                }
+            }
+            .font(.headline.bold())
+            .foregroundStyle(Color(hex: "FFD060"))
+            .frame(minHeight: 22)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)

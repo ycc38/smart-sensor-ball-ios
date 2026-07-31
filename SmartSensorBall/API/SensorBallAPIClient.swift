@@ -158,66 +158,6 @@ struct CloudLeaderboardResult: Codable {
     var isOK: Bool { status == "ok" || success == true }
 }
 
-struct CloudSoundEffect: Codable, Equatable, Identifiable {
-    let id: String
-    let nameZh: String
-    let nameEn: String
-    let descriptionZh: String
-    let descriptionEn: String
-    let style: String
-    let bpm: Int
-    let durationMs: Int
-    let url: String
-
-    private enum CodingKeys: String, CodingKey {
-        case id
-        case nameZh = "name_zh"
-        case nameEn = "name_en"
-        case descriptionZh = "description_zh"
-        case descriptionEn = "description_en"
-        case style
-        case bpm
-        case durationMs = "duration_ms"
-        case url
-    }
-
-    func name(language: AppLanguage) -> String {
-        language == .chinese ? nameZh : nameEn
-    }
-
-    func detail(language: AppLanguage) -> String {
-        language == .chinese ? descriptionZh : descriptionEn
-    }
-
-    static let bundled: [CloudSoundEffect] = [
-        CloudSoundEffect(id: "sensorball_punch_arena_thunder", nameZh: "赛场雷击", nameEn: "Arena Thunder", descriptionZh: "厚重冲击音效，适合标准训练。", descriptionEn: "Heavy impact sound for standard training.", style: "heavy", bpm: 100, durationMs: 460, url: "asset://SFX/01_sensorball_punch_arena_thunder.wav"),
-        CloudSoundEffect(id: "sensorball_punch_street_spark", nameZh: "街头火花", nameEn: "Street Spark", descriptionZh: "清脆明亮音效，适合快速击打。", descriptionEn: "Bright punch sound for fast hits.", style: "street", bpm: 110, durationMs: 460, url: "asset://SFX/02_sensorball_punch_street_spark.wav"),
-        CloudSoundEffect(id: "sensorball_punch_iron_hook", nameZh: "铁拳冲击", nameEn: "Iron Hook", descriptionZh: "金属质感音效，适合力量训练。", descriptionEn: "Metallic punch sound for power work.", style: "metal", bpm: 95, durationMs: 460, url: "asset://SFX/03_sensorball_punch_iron_hook.wav"),
-        CloudSoundEffect(id: "sensorball_punch_neon_jab", nameZh: "霓虹快拳", nameEn: "Neon Jab", descriptionZh: "轻快短促音效，适合节奏训练。", descriptionEn: "Snappy punch sound for rhythm training.", style: "fast", bpm: 120, durationMs: 460, url: "asset://SFX/04_sensorball_punch_neon_jab.wav"),
-        CloudSoundEffect(id: "sensorball_punch_bass_smash", nameZh: "低频重锤", nameEn: "Bass Smash", descriptionZh: "低频厚实音效，适合重击反馈。", descriptionEn: "Deep punch sound for heavy feedback.", style: "bass", bpm: 90, durationMs: 460, url: "asset://SFX/05_sensorball_punch_bass_smash.wav")
-    ]
-}
-
-struct CloudSoundEffectCatalog: Codable {
-    let status: String?
-    let success: Bool?
-    let message: String?
-    let version: Int?
-    let updatedAt: String?
-    let items: [CloudSoundEffect]?
-
-    private enum CodingKeys: String, CodingKey {
-        case status
-        case success
-        case message
-        case version
-        case updatedAt = "updated_at"
-        case items
-    }
-
-    var isOK: Bool { status == "ok" || success == true }
-}
-
 enum LeaderboardBoard: String, CaseIterable, Identifiable {
     case best30 = "best_30_hits"
     case best60 = "best_60_hits"
@@ -299,10 +239,6 @@ struct SensorBallAPIClient {
         return try await post(path: "/api/v1/leaderboard", payload: payload)
     }
 
-    func fetchSoundEffects() async throws -> CloudSoundEffectCatalog {
-        try await get(path: "/api/v1/sound-effects")
-    }
-
     private func authPayload(state: ActivationState, appVersion: String) -> [String: Any] {
         [
             "serial": state.serial,
@@ -311,13 +247,6 @@ struct SensorBallAPIClient {
             "device_hash": state.deviceHash,
             "app_version": appVersion
         ]
-    }
-
-    private func get<T: Decodable>(path: String) async throws -> T {
-        let request = URLRequest(url: endpoint(path))
-        let (data, response) = try await session.data(for: request)
-        try validate(response)
-        return try decoder.decode(T.self, from: data)
     }
 
     private func post<T: Decodable>(path: String, payload: [String: Any]) async throws -> T {
@@ -361,7 +290,6 @@ final class CloudStore: ObservableObject {
     @Published var tier: CloudTierProgress?
     @Published var leaderboard: CloudLeaderboardResult?
     @Published var selectedBoard: LeaderboardBoard = .best30
-    @Published var soundEffects: [CloudSoundEffect] = CloudSoundEffect.bundled
     @Published var promoted = false
 
     private let client = SensorBallAPIClient()
@@ -488,16 +416,6 @@ final class CloudStore: ObservableObject {
         }
     }
 
-    func refreshSoundEffects(language: AppLanguage) async {
-        await runBusy {
-            let result = try await client.fetchSoundEffects()
-            if result.isOK, let items = result.items, !items.isEmpty {
-                soundEffects = items
-            }
-            statusMessage = result.message ?? L10n.text("sound_effects_ready", language)
-        }
-    }
-
     func fallbackAchievements() -> [CloudAchievementItem] {
         let sessions = statistics?.totalSessions ?? 0
         let totalHits = statistics?.totalHits ?? 0
@@ -591,74 +509,33 @@ final class CloudStore: ObservableObject {
 
 @MainActor
 final class SoundEffectManager: ObservableObject {
-    @Published var selectedEffectId: String = SoundEffectManager.fixedEffect.id
-    @Published var selectedEffectName: String = SoundEffectManager.fixedEffect.nameEn
-    @Published var previewStatus: String = ""
-
-    private static let fixedEffect = CloudSoundEffect.bundled.first { $0.id == "sensorball_punch_arena_thunder" } ?? CloudSoundEffect.bundled[0]
-    private var previewPlayer: AVAudioPlayer?
+    private static let localSoundName = "01_sensorball_punch_arena_thunder"
+    private static let playerPoolSize = 6
     private var hitPlayers: [AVAudioPlayer] = []
-    private var selectedURL: String = SoundEffectManager.fixedEffect.url
+    private var nextPlayerIndex = 0
 
     init() {
         configureAudioSession()
-        applyFixedSelection(language: .english)
-    }
-
-    func apply(_ _: CloudSoundEffect, language: AppLanguage) {
-        applyFixedSelection(language: language)
-        previewStatus = selectedEffectName
-    }
-
-    func preview(_ effect: CloudSoundEffect, language: AppLanguage) {
-        previewPlayer?.stop()
-        guard let url = mediaURL(from: effect.url) else {
-            previewStatus = "\(effect.name(language: language)) selected"
-            AudioServicesPlaySystemSound(1104)
-            return
-        }
-        do {
-            let player = try preparedPlayer(for: url)
-            previewPlayer = player
-            player.play()
-            previewStatus = effect.name(language: language)
-        } catch {
-            previewStatus = "\(effect.name(language: language)) selected"
-            AudioServicesPlaySystemSound(1104)
-        }
-    }
-
-    func stopPreview() {
-        previewPlayer?.stop()
-        previewPlayer = nil
+        preparePlayerPool()
     }
 
     func playHit(forceN: Int) {
-        applyFixedSelection(language: .english)
-        let urlString = selectedURL
-        if let url = mediaURL(from: urlString) {
-            do {
-                hitPlayers.removeAll { !$0.isPlaying }
-                let player = try preparedPlayer(for: url)
-                player.volume = volume(for: forceN)
-                hitPlayers.append(player)
-                player.play()
-            } catch {
-                AudioServicesPlaySystemSound(forceN > 150 ? 1152 : 1104)
-            }
-        } else {
-            AudioServicesPlaySystemSound(forceN > 150 ? 1152 : 1104)
+        configureAudioSession()
+        if hitPlayers.isEmpty {
+            preparePlayerPool()
         }
-    }
+        guard !hitPlayers.isEmpty else {
+            AudioServicesPlaySystemSound(forceN > 150 ? 1152 : 1104)
+            return
+        }
 
-    private func applyFixedSelection(language: AppLanguage) {
-        let effect = Self.fixedEffect
-        selectedEffectId = effect.id
-        selectedEffectName = effect.name(language: language)
-        selectedURL = effect.url
-        UserDefaults.standard.set(effect.id, forKey: "selected_sound_effect_id")
-        UserDefaults.standard.set(selectedEffectName, forKey: "selected_sound_effect_name")
-        UserDefaults.standard.set(effect.url, forKey: "selected_sound_effect_url")
+        let availableIndex = hitPlayers.firstIndex(where: { !$0.isPlaying })
+        let playerIndex = availableIndex ?? nextPlayerIndex
+        let player = hitPlayers[playerIndex]
+        player.currentTime = 0
+        player.volume = volume(for: forceN)
+        player.play()
+        nextPlayerIndex = (playerIndex + 1) % hitPlayers.count
     }
 
     private func configureAudioSession() {
@@ -671,41 +548,22 @@ final class SoundEffectManager: ObservableObject {
         }
     }
 
-    private func preparedPlayer(for url: URL) throws -> AVAudioPlayer {
-        configureAudioSession()
-        let player = try AVAudioPlayer(contentsOf: url)
-        player.prepareToPlay()
-        return player
-    }
-
-    private func mediaURL(from urlString: String) -> URL? {
-        guard !urlString.isEmpty else {
-            return nil
+    private func preparePlayerPool() {
+        guard let url =
+            Bundle.main.url(forResource: Self.localSoundName, withExtension: "wav", subdirectory: "SFX")
+                ?? Bundle.main.url(forResource: Self.localSoundName, withExtension: "wav")
+        else {
+            hitPlayers = []
+            return
         }
-        if urlString.hasPrefix("asset://") {
-            let assetPath = String(urlString.dropFirst("asset://".count))
-            let fileName = (assetPath as NSString).lastPathComponent
-            let subdirectory = (assetPath as NSString).deletingLastPathComponent
-            let resourceName = (fileName as NSString).deletingPathExtension
-            let fileExtension = (fileName as NSString).pathExtension
-            let extensionValue: String? = fileExtension.isEmpty ? nil : fileExtension
-            if let url = Bundle.main.url(
-                forResource: resourceName,
-                withExtension: extensionValue,
-                subdirectory: subdirectory.isEmpty ? nil : subdirectory
-            ) {
-                return url
+        hitPlayers = (0..<Self.playerPoolSize).compactMap { _ in
+            guard let player = try? AVAudioPlayer(contentsOf: url) else {
+                return nil
             }
-            if subdirectory.lowercased() == "sfx" {
-                return Bundle.main.url(forResource: resourceName, withExtension: extensionValue, subdirectory: "SFX")
-            }
-            return Bundle.main.url(forResource: resourceName, withExtension: extensionValue)
+            player.prepareToPlay()
+            return player
         }
-        return URL(string: urlString)
-    }
-
-    private func bundledFallbackForSelection() -> CloudSoundEffect? {
-        Self.fixedEffect
+        nextPlayerIndex = 0
     }
 
     private func volume(for forceN: Int) -> Float {
