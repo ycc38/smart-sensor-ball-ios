@@ -1,5 +1,6 @@
 import AVFoundation
 import AudioToolbox
+import CryptoKit
 import Foundation
 import SwiftUI
 import UIKit
@@ -496,7 +497,19 @@ final class CloudStore: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: Keys.activation),
            let state = try? JSONDecoder().decode(ActivationState.self, from: data) {
             activationState = state
+            return
         }
+
+        let now = Int(Date().timeIntervalSince1970 * 1000)
+        activationState = ActivationState(
+            serial: makeLocalUserSerial(),
+            activationToken: "local",
+            installId: installId,
+            deviceHash: deviceHash,
+            activatedAtEpochMs: now,
+            lastCheckAtEpochMs: now
+        )
+        saveActivationState()
     }
 
     private func saveActivationState() {
@@ -504,6 +517,12 @@ final class CloudStore: ObservableObject {
            let data = try? JSONEncoder().encode(activationState) {
             UserDefaults.standard.set(data, forKey: Keys.activation)
         }
+    }
+
+    private func makeLocalUserSerial() -> String {
+        let digest = SHA256.hash(data: Data(installId.utf8))
+        let digits = digest.map { String(Int($0) % 10) }.joined()
+        return String(digits.prefix(11)).padding(toLength: 11, withPad: "0", startingAt: 0)
     }
 }
 

@@ -39,8 +39,6 @@ struct ContentView: View {
     @State private var showingLegal: LegalDocument?
     @State private var showingFirstUsePrompt = false
     @State private var showingEditProfile = false
-    @State private var serialInput = ""
-    @State private var codeInput = ""
     @State private var profileName = ""
     @State private var profileColor = "#145DA0"
     @State private var shareItems: [Any]?
@@ -123,9 +121,7 @@ struct ContentView: View {
                 }
                 Task {
                     await cloud.bootstrap(language: selectedLanguage)
-                    if cloud.isActivated {
-                        await cloud.refreshLeaderboard(language: selectedLanguage)
-                    }
+                    await cloud.refreshLeaderboard(language: selectedLanguage)
                 }
             }
             .onChange(of: selectedLanguage) { language in
@@ -134,7 +130,6 @@ struct ContentView: View {
             }
             .onChange(of: training.latestReport) { report in
                 guard let report = report else { return }
-                guard cloud.isActivated else { return }
                 if leaderboardUploadConsent {
                     Task { await cloud.upload(report: report, language: selectedLanguage) }
                 } else {
@@ -156,7 +151,7 @@ struct ContentView: View {
                     Image(systemName: "dot.radiowaves.left.and.right")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundStyle(bluetooth.isConnected ? Color(hex: "44FF88") : Color(hex: "FF5C5C"))
-                    BatteryBadge(telemetry: bluetooth.telemetry)
+                    BatteryBadge(telemetry: bluetooth.telemetry, language: selectedLanguage)
                 }
             }
             Spacer()
@@ -171,41 +166,6 @@ struct ContentView: View {
             .accessibilityLabel(L10n.text("settings", selectedLanguage))
             .disabled(training.isBusy)
             .opacity(training.isBusy ? 0.5 : 1.0)
-        }
-    }
-
-    private var activationCard: some View {
-        SurfaceCard(stroke: Color(hex: "FFD060")) {
-            VStack(alignment: .leading, spacing: 12) {
-                Label(L10n.text("activation_title", selectedLanguage), systemImage: "key.fill")
-                    .font(.headline.bold())
-                    .foregroundStyle(Color(hex: "FFD060"))
-                Text(L10n.text("activation_hint", selectedLanguage))
-                    .font(.callout)
-                    .foregroundStyle(Color(hex: "FFF0C9"))
-                TextField(L10n.text("serial_placeholder", selectedLanguage), text: $serialInput)
-                    .textInputAutocapitalization(.characters)
-                    .keyboardType(.numberPad)
-                    .fieldStyle()
-                TextField(L10n.text("code_placeholder", selectedLanguage), text: $codeInput)
-                    .textInputAutocapitalization(.characters)
-                    .fieldStyle()
-                HStack(spacing: 10) {
-                    Button(L10n.text("activate", selectedLanguage)) {
-                        Task { await cloud.activate(serial: serialInput, code: codeInput, language: selectedLanguage) }
-                    }
-                    .buttonStyle(ActionButtonStyle(color: Color(hex: "008840")))
-                    Button(L10n.text("restore", selectedLanguage)) {
-                        Task { await cloud.restoreActivation(language: selectedLanguage) }
-                    }
-                    .buttonStyle(ActionButtonStyle(color: Color(hex: "17354A")))
-                }
-                if !cloud.statusMessage.isEmpty {
-                    Text(cloud.statusMessage)
-                        .font(.caption.bold())
-                        .foregroundStyle(Color(hex: "FFD060"))
-                }
-            }
         }
     }
 
@@ -260,7 +220,7 @@ struct ContentView: View {
     private var trainingConsoleCard: some View {
         VStack(spacing: 16) {
             VStack(spacing: 11) {
-                Text(cloud.isActivated ? training.statusText(language: selectedLanguage) : L10n.text("activation_required", selectedLanguage))
+                Text(training.statusText(language: selectedLanguage))
                     .font(.system(size: 17, weight: .black))
                     .foregroundStyle(Color(hex: "F5E7CF"))
                     .multilineTextAlignment(.center)
@@ -282,14 +242,14 @@ struct ContentView: View {
 
                 HStack(spacing: 14) {
                     Button {
-                        Task { await training.start(isActivated: cloud.isActivated) }
+                        Task { await training.start() }
                     } label: {
                         Text(L10n.text("start", selectedLanguage))
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(PillTrainingButtonStyle(color: Color(hex: "F15A13")))
-                    .disabled(training.isBusy || !bluetooth.isConnected || !cloud.isActivated)
-                    .opacity(training.isBusy || !bluetooth.isConnected || !cloud.isActivated ? 0.58 : 1.0)
+                    .disabled(training.isBusy || !bluetooth.isConnected)
+                    .opacity(training.isBusy || !bluetooth.isConnected ? 0.58 : 1.0)
 
                     Button {
                         Task { await training.stop() }
@@ -735,10 +695,6 @@ struct ContentView: View {
     private var profilePage: some View {
         VStack(alignment: .leading, spacing: 16) {
             pageHeading(title: local("个人中心", "Profile Center"), subtitle: local("查看你的段位、训练统计与最近获得的徽章", "Review tier, stats, and recent badges."))
-
-            if !cloud.isActivated {
-                activationCard
-            }
 
             VStack(alignment: .leading, spacing: 18) {
                 VStack(alignment: .leading, spacing: 16) {
@@ -1304,11 +1260,12 @@ private struct AchievementGroup: Identifiable {
 
 private struct BatteryBadge: View {
     let telemetry: SensorBallTelemetry?
+    let language: AppLanguage
 
     var body: some View {
         HStack(spacing: 4) {
             Image(systemName: statusIcon)
-            if let text = telemetry?.batteryText, !text.isEmpty {
+            if let text = telemetry?.batteryText(language: language), !text.isEmpty {
                 Text(text)
                     .font(.caption.bold())
             } else if telemetry == nil {

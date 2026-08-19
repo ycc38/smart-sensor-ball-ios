@@ -2,7 +2,7 @@
 
 ## Guideline 1.5 - Safety
 
-We updated the support website to include current support contact information, common support topics, activation help, data request contact, and privacy policy:
+We updated the support website to include current support contact information, common support topics, local profile help, data request contact, and privacy policy:
 
 - Support URL: https://ycc38.github.io/smart-sensor-ball-ios/
 - Support detail: https://ycc38.github.io/smart-sensor-ball-ios/support.html
@@ -20,17 +20,17 @@ Suggested response:
 
 Smart sensor ball is a companion app for the physical Smart sensor ball Bluetooth boxing sensor hardware. The app itself does not sell paid digital content, subscriptions, or consumable digital services.
 
-1. Users of the cloud features are owners or authorized users of the physical Smart sensor ball hardware.
-2. The physical hardware and its activation code are obtained outside the app. The app does not sell the hardware and does not process purchases.
-3. After entering a valid device serial number and activation code, users can use free companion features bundled with the hardware: Bluetooth training, cloud training history, achievements, rankings, profile sync, and sound effect catalog.
-4. The activation flow unlocks companion functionality for verified hardware owners. It does not unlock separately sold digital content, paid subscriptions, or paid in-app services.
+1. Users of the companion features are owners or authorized users of the physical Smart sensor ball hardware.
+2. Version 1.0.4 does not require registration, login, a test account, or an activation code. A local user profile is created automatically on first launch.
+3. Users can access Bluetooth training directly after connecting compatible hardware. Cloud history, achievements, rankings, and profile sync are free companion features.
+4. No separately sold digital content, paid subscriptions, or paid in-app services are unlocked by the app.
 5. Users cannot buy physical goods, services, subscriptions, or digital content inside the app.
 
 ## Guideline 5.2.1 - Intellectual Property / Hardware Authorization
 
 Attach authorization evidence in App Store Connect App Review Information. Suggested notes:
 
-This app is submitted by an authorized party for the Smart sensor ball companion hardware and related cloud service. The app is authorized to use the Smart sensor ball product name, Bluetooth protocol, activation service, cloud API, training content, and connected hardware features.
+This app is submitted by an authorized party for the Smart sensor ball companion hardware and related cloud service. The app is authorized to use the Smart sensor ball product name, Bluetooth protocol, cloud API, training content, and connected hardware features.
 
 Attached documents include company authorization/business ownership evidence for the Smart sensor ball hardware, cloud service, app name, and related content.
 

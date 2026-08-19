@@ -22,6 +22,7 @@ This directory contains the initial iOS source project for **Smart sensor ball**
   - Light off: `C5 5C 07 00`
   - Light on and brightness: `C5 5C 07 01 XX` (`XX` is `0...99`; the app slider displays `0...100`)
 - The first bundled punch sound is preloaded locally; the app does not request cloud sound effects.
+- A local user profile is generated automatically; registration, login, and activation codes are not required.
 - API base URL: `https://sensorball.86086.cn/sensorball/api/v1/`
 - Chinese, English, French, and Thai UI text
 - Privacy policy and user agreement assets

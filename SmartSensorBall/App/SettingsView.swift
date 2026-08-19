@@ -82,7 +82,7 @@ struct SettingsView: View {
                 HStack(spacing: 10) {
                     bluetoothMetric(
                         label: L10n.text("battery", language),
-                        value: bluetooth.telemetry?.batteryText ?? "--",
+                        value: bluetooth.telemetry?.batteryText(language: language) ?? "--",
                         systemImage: bluetooth.telemetry?.isCharging == true ? "bolt.fill" : nil
                     )
                     bluetoothMetric(label: L10n.text("punch_count", language), value: "\(bluetooth.displayHitCount)")

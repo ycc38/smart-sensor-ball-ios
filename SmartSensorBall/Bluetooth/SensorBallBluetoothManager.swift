@@ -41,6 +41,13 @@ struct SensorBallTelemetry: Equatable {
     var batteryText: String {
         batteryLevel.map { "\($0)%" } ?? (isCharging ? "" : "--")
     }
+
+    func batteryText(language: AppLanguage) -> String {
+        if batteryRaw == 102 {
+            return language == .chinese ? "充满" : "Full"
+        }
+        return batteryText
+    }
 }
 
 @MainActor
