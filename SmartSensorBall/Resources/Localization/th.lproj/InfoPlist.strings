@@ -1,3 +1,4 @@
+"CFBundleDisplayName" = "Vimai Smart Sensor Ball";
 "NSBluetoothAlwaysUsageDescription" = "Smart sensor ball ใช้บลูทูธเพื่อสแกนและเชื่อมต่อ รับข้อมูลแบตเตอรี่ สถานะการชาร์จ และจำนวนหมัด รวมถึงควบคุมไจโรสโคปและไฟ LED ของอุปกรณ์ฝึก";
 "NSBluetoothPeripheralUsageDescription" = "ต้องใช้บลูทูธเพื่อเชื่อมต่ออุปกรณ์ฝึก Smart sensor ball";
 "NSLocalNetworkUsageDescription" = "ใช้เครือข่ายเพื่อซิงก์ประวัติการฝึก ความสำเร็จ และกระดานอันดับ";

@@ -1,3 +1,4 @@
+"CFBundleDisplayName" = "Vimai Smart Sensor Ball";
 "NSBluetoothAlwaysUsageDescription" = "Smart sensor ball uses Bluetooth to scan and connect, receive battery, charging, and punch-count data, and control the gyroscope and LED light on your training device.";
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth is required to connect to the Smart sensor ball training device.";
 "NSLocalNetworkUsageDescription" = "Network access is used to sync training records, achievements, and leaderboard data.";

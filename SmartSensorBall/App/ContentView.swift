@@ -144,9 +144,11 @@ struct ContentView: View {
     private var header: some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 5) {
-                Text("Smart sensor ball")
+                Text("Vimai Smart Sensor Ball")
                     .font(.system(size: 26, weight: .black))
                     .foregroundStyle(Color(hex: "FFF6E5"))
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 10) {
                     Image(systemName: "dot.radiowaves.left.and.right")
                         .font(.system(size: 20, weight: .bold))
@@ -895,7 +897,7 @@ struct ContentView: View {
                 (L10n.text("avg_freq", selectedLanguage), String(format: "%.2f/s", report.averageFrequency)),
                 (L10n.text("best_burst", selectedLanguage), "\(report.bestBurstCount)")
             ],
-            footer: "Smart sensor ball"
+            footer: "Vimai Smart Sensor Ball"
         )
         shareItems = [image, report.coachMessage]
     }
@@ -910,7 +912,7 @@ struct ContentView: View {
                 ("XP", "\(training.trainingXP)"),
                 (L10n.text("streak", selectedLanguage), "\(training.currentStreak)")
             ],
-            footer: "Smart sensor ball"
+            footer: "Vimai Smart Sensor Ball"
         )
         shareItems = [image]
     }
@@ -925,7 +927,7 @@ struct ContentView: View {
                 (L10n.text("score", selectedLanguage), me.map(leaderboardPrimary) ?? "--"),
                 (L10n.text("avg_freq", selectedLanguage), me.map { String(format: "%.2f/s", $0.averageFrequency) } ?? "--")
             ],
-            footer: "Smart sensor ball"
+            footer: "Vimai Smart Sensor Ball"
         )
         shareItems = [image]
     }

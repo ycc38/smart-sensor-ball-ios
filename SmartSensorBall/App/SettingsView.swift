@@ -35,7 +35,7 @@ struct SettingsView: View {
             .alert(L10n.text("developer_info", language), isPresented: $showingDeveloperInfo) {
                 Button(L10n.text("done", language), role: .cancel) {}
             } message: {
-                Text("GlowPeak / Smart sensor ball\nsupport: 869501402@qq.com\nVersion \(cloud.appVersion)")
+                Text("GlowPeak / Vimai Smart Sensor Ball\nsupport: 869501402@qq.com\nVersion \(cloud.appVersion)")
             }
         }
         .navigationViewStyle(.stack)

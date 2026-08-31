@@ -1,3 +1,4 @@
+"CFBundleDisplayName" = "Vimai Smart Sensor Ball";
 "NSBluetoothAlwaysUsageDescription" = "Smart sensor ball 使用蓝牙扫描并连接训练设备，接收电量、充电状态和拳击次数，并控制陀螺仪和 LED 灯光。";
 "NSBluetoothPeripheralUsageDescription" = "需要蓝牙连接 Smart sensor ball 训练设备。";
 "NSLocalNetworkUsageDescription" = "网络用于同步训练记录、成就和榜单数据。";

@@ -1,6 +1,8 @@
-# Smart sensor ball iOS
+# Vimai Smart Sensor Ball iOS
 
-This directory contains the initial iOS source project for **Smart sensor ball**.
+This directory contains the iOS source project for **Vimai Smart Sensor Ball**.
+
+The app display name is `Vimai Smart Sensor Ball` in every supported language. The bundle identifier remains `com.zclei.smartsensorball`.
 
 ## Scope
 
