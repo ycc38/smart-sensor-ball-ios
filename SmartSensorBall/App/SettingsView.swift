@@ -53,6 +53,13 @@ struct SettingsView: View {
                     color: Color(hex: "80FFB0")
                 )
 
+                Label(L10n.text("bluetooth_wake_hint", language), systemImage: "exclamationmark.triangle.fill")
+                    .font(.callout)
+                    .foregroundStyle(Color(hex: "FFD060"))
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(hex: "241A08"), in: RoundedRectangle(cornerRadius: 8))
+
                 Text(bluetooth.statusText)
                     .font(.callout)
                     .foregroundStyle(Color(hex: "B9F8D0"))

@@ -14,20 +14,6 @@ struct ActivationState: Codable, Equatable {
     let lastCheckAtEpochMs: Int
 }
 
-struct ActivationApiResult: Codable {
-    let status: String?
-    let success: Bool?
-    let message: String?
-    let reason: String?
-    let serial: String?
-    let activationToken: String?
-    let licenseState: String?
-
-    var isOK: Bool {
-        status == "ok" || success == true
-    }
-}
-
 struct CloudUserProfile: Codable, Equatable {
     let userId: Int?
     let serial: String?
@@ -178,34 +164,12 @@ enum LeaderboardBoard: String, CaseIterable, Identifiable {
 }
 
 private enum AppAPIConfig {
-    static let baseURL = URL(string: "https://sensorball.86086.cn/sensorball")!
+    static let baseURL = URL(string: "https://sensorball.wavemill.cn/sensorball")!
 }
 
 struct SensorBallAPIClient {
     let baseURL = AppAPIConfig.baseURL
     private let session: URLSession = .shared
-
-    func activate(serial: String, code: String, installId: String, deviceHash: String, appVersion: String) async throws -> ActivationApiResult {
-        try await post(path: "/api/v1/activate", payload: [
-            "serial": serial,
-            "code": code,
-            "install_id": installId,
-            "device_hash": deviceHash,
-            "app_version": appVersion
-        ])
-    }
-
-    func checkActivation(state: ActivationState, appVersion: String) async throws -> ActivationApiResult {
-        try await post(path: "/api/v1/check", payload: authPayload(state: state, appVersion: appVersion))
-    }
-
-    func reactivateByDevice(installId: String, deviceHash: String, appVersion: String) async throws -> ActivationApiResult {
-        try await post(path: "/api/v1/reactivate-by-device", payload: [
-            "install_id": installId,
-            "device_hash": deviceHash,
-            "app_version": appVersion
-        ])
-    }
 
     func bootstrap(state: ActivationState, language: AppLanguage, appVersion: String) async throws -> CloudBootstrapResult {
         var payload = authPayload(state: state, appVersion: appVersion)
@@ -324,49 +288,6 @@ final class CloudStore: ObservableObject {
             defaults.set(installId, forKey: Keys.installId)
         }
         deviceHash = UIDevice.current.identifierForVendor?.uuidString ?? installId
-    }
-
-    func activate(serial: String, code: String, language: AppLanguage) async {
-        let cleanSerial = serial.trimmingCharacters(in: .whitespacesAndNewlines)
-        let cleanCode = code.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !cleanSerial.isEmpty, !cleanCode.isEmpty else {
-            statusMessage = L10n.text("activation_input_required", language)
-            return
-        }
-        await runBusy {
-            let result = try await client.activate(serial: cleanSerial, code: cleanCode, installId: installId, deviceHash: deviceHash, appVersion: appVersion)
-            if result.isOK, let token = result.activationToken {
-                let now = Int(Date().timeIntervalSince1970 * 1000)
-                activationState = ActivationState(
-                    serial: result.serial ?? cleanSerial,
-                    activationToken: token,
-                    installId: installId,
-                    deviceHash: deviceHash,
-                    activatedAtEpochMs: now,
-                    lastCheckAtEpochMs: now
-                )
-                saveActivationState()
-                statusMessage = result.message ?? L10n.text("activation_success", language)
-                await bootstrap(language: language)
-            } else {
-                statusMessage = result.message ?? L10n.text("activation_failed", language)
-            }
-        }
-    }
-
-    func restoreActivation(language: AppLanguage) async {
-        await runBusy {
-            let result = try await client.reactivateByDevice(installId: installId, deviceHash: deviceHash, appVersion: appVersion)
-            if result.isOK, let token = result.activationToken, let serial = result.serial {
-                let now = Int(Date().timeIntervalSince1970 * 1000)
-                activationState = ActivationState(serial: serial, activationToken: token, installId: installId, deviceHash: deviceHash, activatedAtEpochMs: now, lastCheckAtEpochMs: now)
-                saveActivationState()
-                statusMessage = result.message ?? L10n.text("activation_restored", language)
-                await bootstrap(language: language)
-            } else {
-                statusMessage = result.message ?? L10n.text("activation_restore_failed", language)
-            }
-        }
     }
 
     func bootstrap(language: AppLanguage) async {

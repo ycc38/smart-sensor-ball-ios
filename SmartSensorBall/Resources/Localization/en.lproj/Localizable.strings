@@ -1,11 +1,12 @@
 "first_use_title" = "Connect Bluetooth Device";
-"first_use_message" = "Before your first session, open Settings to scan and connect your Smart sensor ball device.";
+"first_use_message" = "Before connecting, hit the device once to wake Bluetooth. After 1 minute without movement, the device enters low-power mode and may not appear in scan results.";
 "open_settings" = "Open Settings";
 "later" = "Later";
 "settings" = "Settings";
 "settings_title" = "Bluetooth Connection and Language";
 "bluetooth_connection" = "Bluetooth Connection";
-"bluetooth_hint" = "Scan for a SENBALL# device first. Training is available after connection.";
+"bluetooth_hint" = "Scan for a SENBALL# device whose last character is a digit. Training is available after connection.";
+"bluetooth_wake_hint" = "After 1 minute without movement, the device enters low-power mode. Hit it once before connecting to wake Bluetooth and make it discoverable.";
 "scan" = "Scan";
 "connect" = "Connect";
 "disconnect" = "Disconnect";

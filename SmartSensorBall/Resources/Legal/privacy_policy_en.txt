@@ -7,6 +7,7 @@ Smart sensor ball is a smart boxing product companion app provided by Shaoxing W
 
 2. Information We Process
 Bluetooth device data: device name, device address, connection status, battery level, and boxing count from SENBALL# devices. This is used for scanning, connection, automatic reconnection, battery display, and training count.
+The product does not require users to enter or submit a product serial number or activation code, and hardware access is not validated through an activation code.
 Training data: mode, duration, boxing count, average frequency, best burst, accumulated hits, sessions, streaks, achievements, ranks, and leaderboard results. Training data is first recorded locally on your device.
 Before the app uploads training scores to cloud sync or global leaderboards for the first time, it asks for your consent in the app. Only after you agree will training score, mode, nickname or masked device ID, tier, and necessary app/device service identifiers be uploaded to the Smart sensor ball cloud. If you do not agree, local Bluetooth training and local records remain available.
 Profile data: nickname, avatar, language, region, and display information used in the app and leaderboards.

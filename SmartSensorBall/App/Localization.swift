@@ -43,7 +43,7 @@ enum L10n {
 
     private static let english: [String: String] = [
         "first_use_title": "Connect Bluetooth Device",
-        "first_use_message": "Before your first session, open Settings to scan and connect your Smart sensor ball device.",
+        "first_use_message": "Before connecting, hit the device once to wake Bluetooth. After 1 minute without movement, the device enters low-power mode and may not appear in scan results.",
         "open_settings": "Open Settings",
         "later": "Later",
         "settings": "Settings",
@@ -59,7 +59,8 @@ enum L10n {
         "tab_profile": "Profile Center",
 
         "bluetooth_connection": "Bluetooth Connection",
-        "bluetooth_hint": "Scan for a SENBALL# / FFE0 BLE device first. Training is available after connection.",
+        "bluetooth_hint": "Scan for a SENBALL# device whose last character is a digit. Training is available after connection.",
+        "bluetooth_wake_hint": "After 1 minute without movement, the device enters low-power mode. Hit it once before connecting to wake Bluetooth and make it discoverable.",
         "scan": "Scan",
         "connect": "Connect",
         "disconnect": "Disconnect",
@@ -76,18 +77,7 @@ enum L10n {
         "light_brightness": "Brightness",
         "light_connect_first": "Connect the Bluetooth device to control the light.",
 
-        "activation_title": "User Profile",
-        "activation_hint": "A local user profile is generated automatically for training sync.",
-        "serial_placeholder": "User ID",
-        "code_placeholder": "Sync code",
-        "activate": "Continue",
-        "restore": "Restore Profile",
         "activation_required": "Preparing this device profile",
-        "activation_input_required": "Preparing this device profile.",
-        "activation_success": "Profile ready.",
-        "activation_failed": "Profile setup failed. Please try again.",
-        "activation_restored": "Profile restored.",
-        "activation_restore_failed": "Profile restore is unavailable.",
         "cloud_needs_activation": "Preparing the local profile for cloud sync.",
         "cloud_ready": "Cloud profile loaded.",
         "cloud_failed": "Cloud request failed.",
@@ -164,7 +154,6 @@ enum L10n {
         "score": "Score",
 
         "guest_trainer": "Guest Trainer",
-        "not_activated": "Profile preparing",
         "edit_profile": "Edit Profile",
         "nickname": "Nickname",
         "profile_saved": "Profile saved.",
@@ -177,7 +166,7 @@ enum L10n {
 
     private static let chinese: [String: String] = [
         "first_use_title": "连接蓝牙设备",
-        "first_use_message": "首次使用前，请进入设置界面扫描并连接 Smart sensor ball 蓝牙设备。",
+        "first_use_message": "设备静止 1 分钟后会自动进入低功耗状态。连接蓝牙前请先击打一下设备以唤醒蓝牙，避免搜索不到设备。",
         "open_settings": "去设置",
         "later": "稍后",
         "settings": "设置",
@@ -193,7 +182,8 @@ enum L10n {
         "tab_profile": "个人中心",
 
         "bluetooth_connection": "蓝牙连接",
-        "bluetooth_hint": "请先扫描 SENBALL# / FFE0 设备，连接成功后即可开始训练。",
+        "bluetooth_hint": "请扫描名称以 SENBALL# 开头且最后一位为数字的设备，连接成功后即可开始训练。",
+        "bluetooth_wake_hint": "设备静止 1 分钟后会自动进入低功耗状态。连接蓝牙前请先击打一下设备以唤醒蓝牙，避免搜索不到设备。",
         "scan": "扫描",
         "connect": "连接",
         "disconnect": "断开",
@@ -210,18 +200,7 @@ enum L10n {
         "light_brightness": "灯光亮度",
         "light_connect_first": "连接蓝牙设备后才能控制灯光。",
 
-        "activation_title": "用户资料",
-        "activation_hint": "本机用户资料会自动生成，并用于同步训练数据。",
-        "serial_placeholder": "用户ID",
-        "code_placeholder": "同步码",
-        "activate": "继续",
-        "restore": "恢复资料",
         "activation_required": "正在准备本机用户资料",
-        "activation_input_required": "正在准备本机用户资料。",
-        "activation_success": "用户资料已准备好。",
-        "activation_failed": "用户资料准备失败，请稍后重试。",
-        "activation_restored": "用户资料已恢复。",
-        "activation_restore_failed": "暂时无法恢复用户资料。",
         "cloud_needs_activation": "正在准备本机用户资料以同步云端数据。",
         "cloud_ready": "云端资料已加载。",
         "cloud_failed": "云端请求失败。",
@@ -298,7 +277,6 @@ enum L10n {
         "score": "成绩",
 
         "guest_trainer": "访客训练者",
-        "not_activated": "资料准备中",
         "edit_profile": "编辑资料",
         "nickname": "昵称",
         "profile_saved": "资料已保存。",
@@ -309,10 +287,24 @@ enum L10n {
         "share_training": "分享训练"
     ]
 
+    private static let french = english.merging([
+        "first_use_title": "Connecter l'appareil Bluetooth",
+        "first_use_message": "Après 1 minute sans mouvement, l'appareil passe en mode basse consommation. Frappez-le une fois avant la connexion pour réveiller le Bluetooth et le rendre détectable.",
+        "bluetooth_hint": "Recherchez un appareil dont le nom commence par SENBALL# et se termine par un chiffre.",
+        "bluetooth_wake_hint": "Après 1 minute sans mouvement, l'appareil passe en mode basse consommation. Frappez-le une fois avant la connexion pour réveiller le Bluetooth et le rendre détectable."
+    ]) { _, localized in localized }
+
+    private static let thai = english.merging([
+        "first_use_title": "เชื่อมต่ออุปกรณ์ Bluetooth",
+        "first_use_message": "เมื่ออุปกรณ์อยู่นิ่ง 1 นาที ระบบจะเข้าสู่โหมดประหยัดพลังงาน โปรดตีอุปกรณ์หนึ่งครั้งก่อนเชื่อมต่อเพื่อปลุก Bluetooth และให้อุปกรณ์ค้นหาเจอ",
+        "bluetooth_hint": "สแกนอุปกรณ์ที่ชื่อขึ้นต้นด้วย SENBALL# และลงท้ายด้วยตัวเลข",
+        "bluetooth_wake_hint": "เมื่ออุปกรณ์อยู่นิ่ง 1 นาที ระบบจะเข้าสู่โหมดประหยัดพลังงาน โปรดตีอุปกรณ์หนึ่งครั้งก่อนเชื่อมต่อเพื่อปลุก Bluetooth และให้อุปกรณ์ค้นหาเจอ"
+    ]) { _, localized in localized }
+
     private static let table: [AppLanguage: [String: String]] = [
         .english: english,
         .chinese: chinese,
-        .french: english,
-        .thai: english
+        .french: french,
+        .thai: thai
     ]
 }

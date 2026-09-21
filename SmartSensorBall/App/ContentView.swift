@@ -680,17 +680,12 @@ struct ContentView: View {
                     .minimumScaleFactor(0.7)
             }
             Spacer()
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(tierLabel(entry.tierKey, fallbackLevel: entry.tierLevel ?? 1))
-                    .font(.caption2.weight(.black))
-                    .foregroundStyle(Color(hex: "CFE9DC"))
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 5)
-                    .background(Color(hex: "17384B"), in: Capsule())
-                Text(entry.serialMasked ?? "********")
-                    .font(.caption2.weight(.black))
-                    .foregroundStyle(Color(hex: "FFF6E5"))
-            }
+            Text(tierLabel(entry.tierKey, fallbackLevel: entry.tierLevel ?? 1))
+                .font(.caption2.weight(.black))
+                .foregroundStyle(Color(hex: "CFE9DC"))
+                .padding(.horizontal, 9)
+                .padding(.vertical, 5)
+                .background(Color(hex: "17384B"), in: Capsule())
         }
     }
 
@@ -731,7 +726,7 @@ struct ContentView: View {
                                 .foregroundStyle(Color(hex: "FFF6E5"))
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.58)
-                            Text("\(local("用户ID", "User ID")): \(cloud.profile?.serialMasked ?? cloud.activationState?.serial ?? "********\(profileSuffix())") | \(local("语言", "Language")): \(selectedLanguage.displayName)")
+                            Text("\(local("语言", "Language")): \(selectedLanguage.displayName)")
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundStyle(Color(hex: "D8C08A"))
                                 .lineLimit(2)
@@ -1001,8 +996,7 @@ struct ContentView: View {
     }
 
     private func profileSuffix() -> String {
-        let serial = cloud.profile?.serialMasked ?? cloud.activationState?.serial ?? cloud.installId
-        let digits = serial.filter(\.isNumber)
+        let digits = cloud.installId.filter(\.isNumber)
         return String((digits.isEmpty ? "9811" : digits).suffix(4))
     }
 

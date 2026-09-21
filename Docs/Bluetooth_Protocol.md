@@ -2,7 +2,11 @@
 
 ## Device Discovery
 
-Only devices whose advertised name starts with `SENBALL#` should be displayed.
+Only devices whose advertised name starts with `SENBALL#` and ends with an ASCII digit (`0-9`) should be displayed.
+
+After the first successful connection, the app stores the peripheral identifier. On later launches it automatically scans for and reconnects to that device.
+
+The device enters low-power mode after one minute without movement. Prompt users to hit the device once before scanning so Bluetooth wakes and becomes discoverable.
 
 ## Commands
 

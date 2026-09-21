@@ -68,9 +68,9 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     private var readableCharacteristics: [CBCharacteristic] = []
     private var writeCharacteristic: CBCharacteristic?
     private var lastRawHitCount: Int?
+    private var autoReconnectIdentifier: UUID?
 
     private static let devicePrefix = "SENBALL#"
-    private static let sensorBallServiceUUIDs = ["FFE0", "0000FFE0-0000-1000-8000-00805F9B34FB"]
     private static let telemetryPacketSize = 11
     private static let telemetryHeader: [UInt8] = [0xD5, 0x5D, 0x03]
     private static let commandOpenGyro = Data([0xC5, 0x5C, 0x04, 0x01])
@@ -78,10 +78,14 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     private static let commandLightPrefix: [UInt8] = [0xC5, 0x5C, 0x07]
     private static let lightBrightnessKey = "sensor_ball_light_brightness"
     private static let defaultLightBrightness = 20
+    private static let lastDeviceIdentifierKey = "sensor_ball_last_device_identifier"
+    private static let autoReconnectScanTimeout: TimeInterval = 12
 
     override init() {
         let storedBrightness = UserDefaults.standard.object(forKey: Self.lightBrightnessKey) as? Int
         lightBrightness = min(max(storedBrightness ?? Self.defaultLightBrightness, 0), 100)
+        autoReconnectIdentifier =
+            UserDefaults.standard.string(forKey: Self.lastDeviceIdentifierKey).flatMap { UUID(uuidString: $0) }
         super.init()
         central = CBCentralManager(delegate: self, queue: nil)
     }
@@ -98,15 +102,29 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     }
 
     func startScan() {
+        beginScan(autoReconnectTo: nil)
+    }
+
+    private func beginScan(autoReconnectTo identifier: UUID?) {
         guard central.state == .poweredOn else {
             statusText = "Bluetooth is not powered on"
             return
         }
+        autoReconnectIdentifier = identifier
         devices.removeAll()
         selectedDevice = nil
         lastScanDebugText = ""
-        statusText = "Scanning SENBALL# devices..."
+        statusText = identifier == nil ? "Scanning SENBALL# devices..." : "Scanning for the last connected device..."
         central.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey: false])
+        guard let identifier else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.autoReconnectScanTimeout) { [weak self] in
+            guard let self,
+                  self.autoReconnectIdentifier == identifier,
+                  self.connectedDevice == nil else { return }
+            self.central.stopScan()
+            self.autoReconnectIdentifier = nil
+            self.statusText = "Last connected device not found. Wake the device and scan again."
+        }
     }
 
     func stopScan() {
@@ -284,13 +302,12 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         return serviceUUIDs
     }
 
-    private static func matchesSensorBall(name: String, serviceUUIDs: [CBUUID]) -> Bool {
-        if name.uppercased().hasPrefix(devicePrefix) {
-            return true
+    private static func matchesSensorBall(name: String) -> Bool {
+        let normalized = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard normalized.hasPrefix(devicePrefix), let lastScalar = normalized.unicodeScalars.last else {
+            return false
         }
-        return serviceUUIDs.contains { uuid in
-            sensorBallServiceUUIDs.contains(uuid.uuidString.uppercased())
-        }
+        return (48...57).contains(Int(lastScalar.value))
     }
 
     private static func characteristicScore(_ characteristic: CBCharacteristic) -> Int {
@@ -307,7 +324,11 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
         Task { @MainActor in
             switch central.state {
             case .poweredOn:
-                statusText = "Bluetooth ready"
+                if let autoReconnectIdentifier, connectedDevice == nil {
+                    beginScan(autoReconnectTo: autoReconnectIdentifier)
+                } else {
+                    statusText = "Bluetooth ready"
+                }
             case .poweredOff:
                 isLightOn = false
                 statusText = "Bluetooth is off"
@@ -329,13 +350,12 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
             let serviceText = serviceUUIDs.map(\.uuidString).joined(separator: ",")
             lastScanDebugText = "Last seen: \(name.isEmpty ? "N/A" : name), services: \(serviceText.isEmpty ? "N/A" : serviceText), RSSI: \(RSSI.intValue)"
 
-            guard Self.matchesSensorBall(name: name, serviceUUIDs: serviceUUIDs) else {
+            guard Self.matchesSensorBall(name: name) else {
                 return
             }
-            let displayName = name.isEmpty ? "\(Self.devicePrefix)\(peripheral.identifier.uuidString.prefix(6))" : name
             let item = SensorBallDevice(
                 id: peripheral.identifier,
-                name: displayName,
+                name: name,
                 identifier: peripheral.identifier,
                 rssi: RSSI.intValue,
                 advertisedServices: serviceUUIDs.map(\.uuidString),
@@ -348,6 +368,14 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
             }
             if devices.count == 1 {
                 selectedDevice = item
+            }
+            if autoReconnectIdentifier == peripheral.identifier {
+                autoReconnectIdentifier = nil
+                selectedDevice = item
+                central.stopScan()
+                statusText = "Auto-connecting \(item.name)..."
+                central.connect(peripheral)
+                return
             }
             statusText = "\(devices.count) SENBALL# device(s) found"
         }
@@ -365,6 +393,8 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
                     advertisedServices: [],
                     peripheral: peripheral
                 )
+            UserDefaults.standard.set(peripheral.identifier.uuidString, forKey: Self.lastDeviceIdentifierKey)
+            autoReconnectIdentifier = nil
             writeCharacteristic = nil
             readableCharacteristics.removeAll()
             notifyCharacteristics.removeAll()

@@ -1,11 +1,12 @@
 "first_use_title" = "Connecter l'appareil Bluetooth";
-"first_use_message" = "Avant la première séance, ouvrez les paramètres pour scanner et connecter votre appareil Smart sensor ball.";
+"first_use_message" = "Après 1 minute sans mouvement, l'appareil passe en mode basse consommation. Frappez-le une fois avant la connexion pour réveiller le Bluetooth et le rendre détectable.";
 "open_settings" = "Ouvrir les paramètres";
 "later" = "Plus tard";
 "settings" = "Paramètres";
 "settings_title" = "Connexion Bluetooth et langue";
 "bluetooth_connection" = "Connexion Bluetooth";
-"bluetooth_hint" = "Scannez d'abord un appareil SENBALL#. L'entraînement sera disponible après connexion.";
+"bluetooth_hint" = "Recherchez un appareil dont le nom commence par SENBALL# et se termine par un chiffre.";
+"bluetooth_wake_hint" = "Après 1 minute sans mouvement, l'appareil passe en mode basse consommation. Frappez-le une fois avant la connexion pour réveiller le Bluetooth et le rendre détectable.";
 "scan" = "Scanner";
 "connect" = "Connecter";
 "disconnect" = "Déconnecter";

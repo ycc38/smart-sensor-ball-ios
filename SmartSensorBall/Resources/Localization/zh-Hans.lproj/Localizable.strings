@@ -1,11 +1,12 @@
 "first_use_title" = "连接蓝牙设备";
-"first_use_message" = "首次使用前，请进入设置界面扫描并连接 Smart sensor ball 蓝牙设备。";
+"first_use_message" = "设备静止 1 分钟后会自动进入低功耗状态。连接蓝牙前请先击打一下设备以唤醒蓝牙，避免搜索不到设备。";
 "open_settings" = "去设置";
 "later" = "稍后";
 "settings" = "设置";
 "settings_title" = "蓝牙连接及语言选择";
 "bluetooth_connection" = "蓝牙连接";
-"bluetooth_hint" = "请先扫描 SENBALL# 设备，连接成功后即可开始训练。";
+"bluetooth_hint" = "请扫描名称以 SENBALL# 开头且最后一位为数字的设备，连接成功后即可开始训练。";
+"bluetooth_wake_hint" = "设备静止 1 分钟后会自动进入低功耗状态。连接蓝牙前请先击打一下设备以唤醒蓝牙，避免搜索不到设备。";
 "scan" = "扫描";
 "connect" = "连接";
 "disconnect" = "断开";
