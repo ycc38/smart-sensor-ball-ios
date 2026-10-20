@@ -19,6 +19,12 @@
 		A00000000000000000000010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000120 /* Assets.xcassets */; };
 		A00000000000000000000011 /* Legal in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000122 /* Legal */; };
 		A00000000000000000000012 /* SFX in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000123 /* SFX */; };
+		A00000000000000000000013 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000130 /* InfoPlist.strings */; };
+		A00000000000000000000014 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000140 /* Localizable.strings */; };
+		A00000000000000000000015 /* DeveloperInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000111 /* DeveloperInfoView.swift */; };
+		A00000000000000000000016 /* ProfileAvatarStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000112 /* ProfileAvatarStore.swift */; };
+		A00000000000000000000017 /* LaunchSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000113 /* LaunchSplashView.swift */; };
+		A00000000000000000000018 /* Video in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000124 /* Video */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,10 +39,28 @@
 		A00000000000000000000108 /* TrainingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingManager.swift; sourceTree = "<group>"; };
 		A00000000000000000000109 /* SensorBallAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorBallAPIClient.swift; sourceTree = "<group>"; };
 		A00000000000000000000110 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A00000000000000000000111 /* DeveloperInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperInfoView.swift; sourceTree = "<group>"; };
+		A00000000000000000000112 /* ProfileAvatarStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAvatarStore.swift; sourceTree = "<group>"; };
+		A00000000000000000000113 /* LaunchSplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchSplashView.swift; sourceTree = "<group>"; };
 		A00000000000000000000120 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SmartSensorBall/Resources/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		A00000000000000000000121 /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Resources; sourceTree = "<group>"; };
 		A00000000000000000000122 /* Legal */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SmartSensorBall/Resources/Legal; sourceTree = SOURCE_ROOT; };
 		A00000000000000000000123 /* SFX */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SmartSensorBall/Resources/SFX; sourceTree = SOURCE_ROOT; };
+		A00000000000000000000124 /* Video */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SmartSensorBall/Resources/Video; sourceTree = SOURCE_ROOT; };
+		A00000000000000000000131 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A00000000000000000000132 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		A00000000000000000000133 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A00000000000000000000134 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A00000000000000000000135 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A00000000000000000000136 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A00000000000000000000137 /* th */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = th; path = th.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A00000000000000000000141 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A00000000000000000000142 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		A00000000000000000000143 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A00000000000000000000144 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A00000000000000000000145 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A00000000000000000000146 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A00000000000000000000147 /* th */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = th; path = th.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +90,7 @@
 				A00000000000000000000313 /* Training */,
 				A00000000000000000000314 /* API */,
 				A00000000000000000000121 /* Resources */,
+				A00000000000000000000315 /* Localization */,
 				A00000000000000000000110 /* Info.plist */,
 			);
 			path = SmartSensorBall;
@@ -78,6 +103,9 @@
 				A00000000000000000000102 /* ContentView.swift */,
 				A00000000000000000000103 /* SettingsView.swift */,
 				A00000000000000000000104 /* LegalDocumentView.swift */,
+				A00000000000000000000111 /* DeveloperInfoView.swift */,
+				A00000000000000000000112 /* ProfileAvatarStore.swift */,
+				A00000000000000000000113 /* LaunchSplashView.swift */,
 				A00000000000000000000105 /* Localization.swift */,
 				A00000000000000000000106 /* EnvironmentValues.swift */,
 			);
@@ -107,6 +135,16 @@
 			);
 			path = API;
 			sourceTree = "<group>";
+		};
+		A00000000000000000000315 /* Localization */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000130 /* InfoPlist.strings */,
+				A00000000000000000000140 /* Localizable.strings */,
+			);
+			name = Localization;
+			path = SmartSensorBall/Resources/Localization;
+			sourceTree = SOURCE_ROOT;
 		};
 		A00000000000000000000320 /* Products */ = {
 			isa = PBXGroup;
@@ -159,6 +197,9 @@
 				en,
 				zh-Hans,
 				fr,
+				es,
+				de,
+				ko,
 				th,
 				Base,
 			);
@@ -180,6 +221,9 @@
 				A00000000000000000000010 /* Assets.xcassets in Resources */,
 				A00000000000000000000011 /* Legal in Resources */,
 				A00000000000000000000012 /* SFX in Resources */,
+				A00000000000000000000013 /* InfoPlist.strings in Resources */,
+				A00000000000000000000014 /* Localizable.strings in Resources */,
+				A00000000000000000000018 /* Video in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -194,6 +238,9 @@
 				A00000000000000000000002 /* ContentView.swift in Sources */,
 				A00000000000000000000003 /* SettingsView.swift in Sources */,
 				A00000000000000000000004 /* LegalDocumentView.swift in Sources */,
+				A00000000000000000000015 /* DeveloperInfoView.swift in Sources */,
+				A00000000000000000000016 /* ProfileAvatarStore.swift in Sources */,
+				A00000000000000000000017 /* LaunchSplashView.swift in Sources */,
 				A00000000000000000000005 /* Localization.swift in Sources */,
 				A00000000000000000000006 /* EnvironmentValues.swift in Sources */,
 				A00000000000000000000007 /* SensorBallBluetoothManager.swift in Sources */,
@@ -203,6 +250,37 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		A00000000000000000000130 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A00000000000000000000131 /* en */,
+				A00000000000000000000132 /* zh-Hans */,
+				A00000000000000000000133 /* fr */,
+				A00000000000000000000134 /* es */,
+				A00000000000000000000135 /* de */,
+				A00000000000000000000136 /* ko */,
+				A00000000000000000000137 /* th */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		A00000000000000000000140 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A00000000000000000000141 /* en */,
+				A00000000000000000000142 /* zh-Hans */,
+				A00000000000000000000143 /* fr */,
+				A00000000000000000000144 /* es */,
+				A00000000000000000000145 /* de */,
+				A00000000000000000000146 /* ko */,
+				A00000000000000000000147 /* th */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		A00000000000000000000600 /* Debug */ = {

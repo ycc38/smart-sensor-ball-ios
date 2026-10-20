@@ -1,0 +1,4 @@
+"CFBundleDisplayName" = "Vimai Smart Sensor Ball";
+"NSBluetoothAlwaysUsageDescription" = "Smart sensor ball은 Bluetooth를 사용하여 훈련 기기를 검색하고 연결하며, 배터리·충전·펀치 카운트 데이터를 수신하고 자이로스코프와 LED 조명을 제어합니다.";
+"NSBluetoothPeripheralUsageDescription" = "Smart sensor ball 훈련 기기를 연결하려면 Bluetooth가 필요합니다.";
+"NSLocalNetworkUsageDescription" = "네트워크는 훈련 기록, 업적 및 순위표 데이터를 동기화하는 데 사용됩니다.";

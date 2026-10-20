@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject private var bluetooth: SensorBallBluetoothManager
-    @EnvironmentObject private var cloud: CloudStore
     @Environment(\.dismiss) private var dismiss
     @Binding var language: AppLanguage
     @State private var showingLegal: LegalDocument?
@@ -32,10 +31,8 @@ struct SettingsView: View {
             .sheet(item: $showingLegal) { document in
                 LegalDocumentView(document: document, language: language)
             }
-            .alert(L10n.text("developer_info", language), isPresented: $showingDeveloperInfo) {
-                Button(L10n.text("done", language), role: .cancel) {}
-            } message: {
-                Text("GlowPeak / Vimai Smart Sensor Ball\nsupport: 869501402@qq.com\nVersion \(cloud.appVersion)")
+            .sheet(isPresented: $showingDeveloperInfo) {
+                DeveloperInfoView(language: language)
             }
         }
         .navigationViewStyle(.stack)
@@ -60,7 +57,7 @@ struct SettingsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(hex: "241A08"), in: RoundedRectangle(cornerRadius: 8))
 
-                Text(bluetooth.statusText)
+                Text(bluetooth.statusText(language: language))
                     .font(.callout)
                     .foregroundStyle(Color(hex: "B9F8D0"))
                     .padding(12)
@@ -196,14 +193,29 @@ struct SettingsView: View {
         SettingsCard(stroke: Color(hex: "2A6A8F")) {
             VStack(alignment: .leading, spacing: 12) {
                 settingsSectionHeader(title: L10n.text("language", language), subtitle: L10n.text("language_helper", language), color: Color(hex: "8FD8FF"))
-                Picker(L10n.text("language", language), selection: $language) {
+                // An explicit list instead of an inline Picker: outside a List/Form that renders as a wheel
+                // with system-colored text, which was invisible on this dark card in Light Mode.
+                VStack(spacing: 8) {
                     ForEach(AppLanguage.allCases) { item in
-                        Text(item.displayName).tag(item)
+                        Button {
+                            language = item
+                            item.save()
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: language == item ? "largecircle.fill.circle" : "circle")
+                                    .font(.headline)
+                                    .foregroundStyle(language == item ? Color(hex: "80FFB0") : Color(hex: "8FEFBC"))
+                                Text(item.displayName)
+                                    .font(.headline)
+                                    .foregroundStyle(Color(hex: "FFF6E5"))
+                                Spacer()
+                            }
+                            .padding(12)
+                            .background(language == item ? Color(hex: "1B6F48") : Color(hex: "0A241A"), in: RoundedRectangle(cornerRadius: 12))
+                            .contentShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        .accessibilityAddTraits(language == item ? .isSelected : [])
                     }
-                }
-                .pickerStyle(.inline)
-                .onChange(of: language) { newValue in
-                    newValue.save()
                 }
             }
         }
@@ -304,11 +316,23 @@ private struct SettingsActionStyle: ButtonStyle {
     let color: Color
 
     func makeBody(configuration: Configuration) -> some View {
+        SettingsActionLabel(configuration: configuration, color: color)
+    }
+}
+
+/// Reads isEnabled from the environment so disabled buttons are dimmed (0.42, like Android's setBluetoothButtonEnabled).
+private struct SettingsActionLabel: View {
+    let configuration: ButtonStyleConfiguration
+    let color: Color
+    @Environment(\.isEnabled) private var isEnabled
+
+    var body: some View {
         configuration.label
             .font(.subheadline.bold())
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 11)
             .background(color.opacity(configuration.isPressed ? 0.65 : 1), in: RoundedRectangle(cornerRadius: 10))
+            .opacity(isEnabled ? 1.0 : 0.42)
     }
 }

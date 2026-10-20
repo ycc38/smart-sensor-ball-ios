@@ -44,9 +44,156 @@ struct SensorBallTelemetry: Equatable {
 
     func batteryText(language: AppLanguage) -> String {
         if batteryRaw == 102 {
-            return language == .chinese ? "充满" : "Full"
+            return L10n.text("battery_full", language)
         }
         return batteryText
+    }
+}
+
+enum SensorBallBluetoothStatus: Equatable {
+    case disconnected
+    case notPoweredOn
+    case poweredOff
+    case unauthorized
+    case unavailable
+    case ready
+    case scanning
+    case scanningLastDevice
+    case lastDeviceNotFound
+    case devicesFound(Int)
+    case autoSelected(String)
+    case selectDeviceFirst
+    case connecting(String)
+    case autoConnecting(String)
+    case reconnecting(String)
+    case discoveringServices
+    case packetReceived(Int)
+    case gyroscopeEnabled
+    case gyroscopeDisabled
+    case lightEnabled
+    case lightDisabled
+    case lightNeedsConnection
+    case writeUnavailable
+    case reconnectScheduled(delaySeconds: Double, attempt: Int, maxAttempts: Int)
+    case reconnectPaused
+    case reconnectedDuringTraining(String)
+
+    func text(language: AppLanguage) -> String {
+        switch self {
+        case .disconnected:
+            return language.localized("蓝牙已断开", "Bluetooth disconnected", fr: "Bluetooth déconnecté", th: "ตัดการเชื่อมต่อบลูทูธแล้ว")
+        case .notPoweredOn:
+            return language.localized("蓝牙未开启", "Bluetooth is not powered on", fr: "Le Bluetooth n'est pas activé", th: "บลูทูธยังไม่ได้เปิด")
+        case .poweredOff:
+            return language.localized("蓝牙已关闭", "Bluetooth is off", fr: "Le Bluetooth est désactivé", th: "บลูทูธปิดอยู่")
+        case .unauthorized:
+            return language.localized(
+                "未获得蓝牙权限，无法连接设备。",
+                "Bluetooth permission is required to connect.",
+                fr: "L'autorisation Bluetooth est nécessaire pour se connecter.",
+                th: "ต้องอนุญาตบลูทูธเพื่อเชื่อมต่อ"
+            )
+        case .unavailable:
+            return language.localized("蓝牙不可用", "Bluetooth unavailable", fr: "Bluetooth indisponible", th: "บลูทูธไม่พร้อมใช้งาน")
+        case .ready:
+            return language.localized("蓝牙已就绪", "Bluetooth ready", fr: "Bluetooth prêt", th: "บลูทูธพร้อมใช้งาน")
+        case .scanning:
+            return language.localized(
+                "正在扫描 SENBALL# 设备...",
+                "Scanning SENBALL# devices...",
+                fr: "Recherche d'appareils SENBALL#...",
+                th: "กำลังสแกนอุปกรณ์ SENBALL#..."
+            )
+        case .scanningLastDevice:
+            return language.localized(
+                "正在搜索上次连接的设备...",
+                "Scanning for the last connected device...",
+                fr: "Recherche du dernier appareil connecté...",
+                th: "กำลังค้นหาอุปกรณ์ที่เชื่อมต่อล่าสุด..."
+            )
+        case .lastDeviceNotFound:
+            return language.localized(
+                "未找到上次连接的设备，请唤醒设备后重新扫描。",
+                "Last connected device not found. Wake the device and scan again.",
+                fr: "Dernier appareil connecté introuvable. Réveillez l'appareil et relancez la recherche.",
+                th: "ไม่พบอุปกรณ์ที่เชื่อมต่อล่าสุด โปรดปลุกอุปกรณ์แล้วสแกนอีกครั้ง"
+            )
+        case .devicesFound(let count):
+            return language.localized(
+                "已扫描到 \(count) 个设备，请选择设备",
+                "\(count) devices found. Select one.",
+                fr: "\(count) appareils trouvés. Sélectionnez-en un.",
+                th: "พบอุปกรณ์ \(count) เครื่อง โปรดเลือกอุปกรณ์"
+            )
+        case .autoSelected(let name):
+            return language.localized("已自动选择 \(name)", "Auto-selected \(name)", fr: "\(name) sélectionné automatiquement", th: "เลือก \(name) โดยอัตโนมัติ")
+        case .selectDeviceFirst:
+            return language.localized("请先扫描并选择设备", "Scan and select a device first", fr: "Scannez puis sélectionnez un appareil", th: "โปรดสแกนและเลือกอุปกรณ์ก่อน")
+        case .connecting(let name):
+            return language.localized("正在连接 \(name)...", "Connecting \(name)...", fr: "Connexion à \(name)...", th: "กำลังเชื่อมต่อ \(name)...")
+        case .autoConnecting(let name):
+            return language.localized(
+                "正在自动连接上次设备 \(name)...",
+                "Auto-connecting last device \(name)...",
+                fr: "Connexion automatique au dernier appareil \(name)...",
+                th: "กำลังเชื่อมต่ออุปกรณ์ล่าสุด \(name) อัตโนมัติ..."
+            )
+        case .reconnecting(let name):
+            return language.localized("正在重新连接 \(name)...", "Reconnecting \(name)...", fr: "Reconnexion à \(name)...", th: "กำลังเชื่อมต่อ \(name) อีกครั้ง...")
+        case .discoveringServices:
+            return language.localized(
+                "已连接，正在发现服务...",
+                "Connected. Discovering services...",
+                fr: "Connecté. Recherche des services...",
+                th: "เชื่อมต่อแล้ว กำลังค้นหาบริการ..."
+            )
+        case .packetReceived(let index):
+            return language.localized("已接收数据包 \(index)", "Packet \(index) received", fr: "Paquet \(index) reçu", th: "ได้รับแพ็กเก็ต \(index) แล้ว")
+        case .gyroscopeEnabled:
+            return language.localized("陀螺仪已开启", "Gyroscope enabled", fr: "Gyroscope activé", th: "เปิดไจโรสโคปแล้ว")
+        case .gyroscopeDisabled:
+            return language.localized("陀螺仪已关闭", "Gyroscope disabled", fr: "Gyroscope désactivé", th: "ปิดไจโรสโคปแล้ว")
+        case .lightEnabled:
+            return language.localized("灯光已打开", "Light enabled", fr: "Éclairage activé", th: "เปิดไฟแล้ว")
+        case .lightDisabled:
+            return language.localized("灯光已关闭", "Light disabled", fr: "Éclairage désactivé", th: "ปิดไฟแล้ว")
+        case .lightNeedsConnection:
+            return language.localized(
+                "请先连接蓝牙再打开灯光",
+                "Connect Bluetooth before turning on the light",
+                fr: "Connectez le Bluetooth avant d'allumer l'éclairage",
+                th: "โปรดเชื่อมต่อบลูทูธก่อนเปิดไฟ"
+            )
+        case .writeUnavailable:
+            return language.localized(
+                "未找到可写入的蓝牙通道",
+                "Bluetooth write channel unavailable",
+                fr: "Canal d'écriture Bluetooth indisponible",
+                th: "ไม่พบช่องทางเขียนข้อมูลบลูทูธ"
+            )
+        case .reconnectScheduled(let delaySeconds, let attempt, let maxAttempts):
+            let delay = String(format: "%.1f", delaySeconds)
+            return language.localized(
+                "蓝牙信号中断，\(delay) 秒后自动重连 (\(attempt)/\(maxAttempts))",
+                "Bluetooth signal lost. Reconnecting in \(delay)s (\(attempt)/\(maxAttempts))",
+                fr: "Signal Bluetooth perdu. Reconnexion dans \(delay) s (\(attempt)/\(maxAttempts))",
+                th: "สัญญาณบลูทูธขาดหาย จะเชื่อมต่อใหม่ใน \(delay) วินาที (\(attempt)/\(maxAttempts))"
+            )
+        case .reconnectPaused:
+            return language.localized(
+                "蓝牙信号不稳定，自动重连已暂停，请靠近设备后重新连接",
+                "Bluetooth signal is unstable. Auto-reconnect paused. Move closer to the device and connect again.",
+                fr: "Signal Bluetooth instable. Reconnexion automatique suspendue. Rapprochez-vous de l'appareil et reconnectez-le.",
+                th: "สัญญาณบลูทูธไม่เสถียร หยุดเชื่อมต่ออัตโนมัติชั่วคราว โปรดเข้าใกล้อุปกรณ์แล้วเชื่อมต่อใหม่"
+            )
+        case .reconnectedDuringTraining(let name):
+            return language.localized(
+                "已重新连接 \(name)，训练继续",
+                "Reconnected to \(name). Training continues.",
+                fr: "\(name) reconnecté. L'entraînement continue.",
+                th: "เชื่อมต่อ \(name) อีกครั้งแล้ว ฝึกต่อได้"
+            )
+        }
     }
 }
 
@@ -56,12 +203,14 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     @Published var selectedDevice: SensorBallDevice?
     @Published var connectedDevice: SensorBallDevice?
     @Published var telemetry: SensorBallTelemetry?
-    @Published var statusText: String = "Bluetooth disconnected"
+    @Published private(set) var status: SensorBallBluetoothStatus = .disconnected
     @Published var lastScanDebugText: String = ""
     @Published var displayHitCount: Int = 0
     @Published var peakForce: Int = 0
     @Published private(set) var isLightOn = false
     @Published private(set) var lightBrightness: Int
+    /// Set by the training manager while a session counts down or runs; battery refresh pauses meanwhile.
+    var isTrainingActive = false
 
     private var central: CBCentralManager!
     private var notifyCharacteristics: [CBCharacteristic] = []
@@ -69,6 +218,16 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     private var writeCharacteristic: CBCharacteristic?
     private var lastRawHitCount: Int?
     private var autoReconnectIdentifier: UUID?
+    private var gyroscopeEnabled = false
+    private var readyDispatched = false
+    private var manualDisconnectRequested = false
+    private var reconnectTarget: SensorBallDevice?
+    private var pendingPeripheral: CBPeripheral?
+    private var reconnectAttempts = 0
+    private var reconnectTask: Task<Void, Never>?
+    private var connectionWatchdogTask: Task<Void, Never>?
+    private var batteryRefreshTask: Task<Void, Never>?
+    private var batteryRefreshPausedUntil = Date.distantPast
 
     private static let devicePrefix = "SENBALL#"
     private static let telemetryPacketSize = 11
@@ -79,7 +238,15 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     private static let lightBrightnessKey = "sensor_ball_light_brightness"
     private static let defaultLightBrightness = 20
     private static let lastDeviceIdentifierKey = "sensor_ball_last_device_identifier"
+    private static let lastDeviceNameKey = "sensor_ball_last_device_name"
     private static let autoReconnectScanTimeout: TimeInterval = 12
+    private static let connectionTimeout: TimeInterval = 12
+    private static let maxReconnectAttempts = 12
+    private static let initialReconnectDelay: TimeInterval = 0.8
+    private static let maxReconnectDelay: TimeInterval = 8
+    private static let batteryRefreshInterval: TimeInterval = 3
+    private static let chargingBatteryRefreshInterval: TimeInterval = 1.2
+    private static let lightCommandRefreshPause: TimeInterval = 1.2
 
     override init() {
         let storedBrightness = UserDefaults.standard.object(forKey: Self.lightBrightnessKey) as? Int
@@ -94,6 +261,10 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         connectedDevice != nil
     }
 
+    func statusText(language: AppLanguage) -> String {
+        status.text(language: language)
+    }
+
     func connectionTitle(language: AppLanguage) -> String {
         if let connectedDevice {
             return connectedDevice.name
@@ -102,19 +273,19 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
     }
 
     func startScan() {
+        stopAutoReconnect()
         beginScan(autoReconnectTo: nil)
     }
 
     private func beginScan(autoReconnectTo identifier: UUID?) {
         guard central.state == .poweredOn else {
-            statusText = "Bluetooth is not powered on"
+            status = .notPoweredOn
             return
         }
         autoReconnectIdentifier = identifier
-        devices.removeAll()
-        selectedDevice = nil
+        clearDeviceList()
         lastScanDebugText = ""
-        statusText = identifier == nil ? "Scanning SENBALL# devices..." : "Scanning for the last connected device..."
+        status = identifier == nil ? .scanning : .scanningLastDevice
         central.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey: false])
         guard let identifier else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + Self.autoReconnectScanTimeout) { [weak self] in
@@ -123,7 +294,7 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
                   self.connectedDevice == nil else { return }
             self.central.stopScan()
             self.autoReconnectIdentifier = nil
-            self.statusText = "Last connected device not found. Wake the device and scan again."
+            self.status = .lastDeviceNotFound
         }
     }
 
@@ -133,15 +304,21 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
 
     func connectSelected() {
         guard let selectedDevice = selectedDevice else {
-            statusText = "Select a SENBALL# device first"
+            status = .selectDeviceFirst
             return
         }
         central.stopScan()
-        statusText = "Connecting \(selectedDevice.name)..."
-        central.connect(selectedDevice.peripheral)
+        autoReconnectIdentifier = nil
+        beginConnection(to: selectedDevice, status: .connecting(selectedDevice.name))
     }
 
+    /// Manual disconnect: cancels any pending reconnect but keeps the saved last device for the next launch.
     func disconnect() {
+        manualDisconnectRequested = true
+        cancelReconnect()
+        cancelConnectionWatchdog()
+        reconnectTarget = nil
+        reconnectAttempts = 0
         if let peripheral = connectedDevice?.peripheral {
             let lightOffQueued = setLightEnabled(false)
             if lightOffQueued {
@@ -151,13 +328,13 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
             } else {
                 central.cancelPeripheralConnection(peripheral)
             }
+        } else if let pendingPeripheral {
+            central.cancelPeripheralConnection(pendingPeripheral)
         }
-        isLightOn = false
-        connectedDevice = nil
-        writeCharacteristic = nil
-        readableCharacteristics.removeAll()
-        notifyCharacteristics.removeAll()
-        statusText = "Bluetooth disconnected"
+        pendingPeripheral = nil
+        clearConnectionState()
+        clearDeviceList()
+        status = .disconnected
     }
 
     func resetDisplayHitCount() {
@@ -168,8 +345,9 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
 
     @discardableResult
     func setGyroscopeEnabled(_ enabled: Bool) -> Bool {
+        gyroscopeEnabled = enabled
         let payload = enabled ? Self.commandOpenGyro : Self.commandCloseGyro
-        return writeCommand(payload, status: enabled ? "Gyroscope enabled" : "Gyroscope disabled")
+        return writeCommand(payload, status: enabled ? .gyroscopeEnabled : .gyroscopeDisabled)
     }
 
     @discardableResult
@@ -179,7 +357,7 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         }
         guard connectedDevice != nil, writeCharacteristic != nil else {
             if enabled {
-                statusText = "Connect Bluetooth before turning on the light"
+                status = .lightNeedsConnection
             }
             return false
         }
@@ -191,7 +369,8 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         } else {
             payload = Data(Self.commandLightPrefix + [0x00])
         }
-        guard writeCommand(payload, status: enabled ? "Light enabled" : "Light disabled") else {
+        batteryRefreshPausedUntil = Date().addingTimeInterval(Self.lightCommandRefreshPause)
+        guard writeCommand(payload, status: enabled ? .lightEnabled : .lightDisabled) else {
             return false
         }
         isLightOn = enabled
@@ -209,29 +388,37 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         return setLightEnabled(true)
     }
 
-    private func writeCommand(_ payload: Data, status: String) -> Bool {
+    /// Writes a control packet. A nil status sends it silently (used for periodic telemetry refreshes).
+    private func writeCommand(_ payload: Data, status newStatus: SensorBallBluetoothStatus?) -> Bool {
         guard let connectedDevice = connectedDevice, let writeCharacteristic = writeCharacteristic else {
-            statusText = "Bluetooth write channel unavailable"
+            if newStatus != nil && !isReconnecting {
+                status = .writeUnavailable
+            }
             return false
         }
         let type: CBCharacteristicWriteType =
             writeCharacteristic.properties.contains(.writeWithoutResponse) ? .withoutResponse : .withResponse
         connectedDevice.peripheral.writeValue(payload, for: writeCharacteristic, type: type)
-        statusText = status
+        if let newStatus {
+            status = newStatus
+        }
         return true
     }
 
     @discardableResult
-    func requestTelemetryRefresh(allowGyroscopeOffFallback: Bool = true) -> Bool {
+    func requestTelemetryRefresh(allowGyroscopeOffFallback: Bool = true, forceGyroscopeOffFallback: Bool = false) -> Bool {
         guard let peripheral = connectedDevice?.peripheral else {
             return false
+        }
+        if allowGyroscopeOffFallback && forceGyroscopeOffFallback {
+            return writeCommand(Self.commandCloseGyro, status: nil)
         }
         if let readable = readableCharacteristics.sorted(by: { Self.characteristicScore($0) > Self.characteristicScore($1) }).first {
             peripheral.readValue(for: readable)
             return true
         }
         if allowGyroscopeOffFallback {
-            return setGyroscopeEnabled(false)
+            return writeCommand(Self.commandCloseGyro, status: nil)
         }
         return false
     }
@@ -243,7 +430,7 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         self.telemetry = telemetry
         peakForce = telemetry.forceN
         updateHitCount(rawCount: telemetry.hitCount)
-        statusText = "Packet \(telemetry.packetIndex) received"
+        status = .packetReceived(telemetry.packetIndex)
     }
 
     private func updateHitCount(rawCount: Int) {
@@ -263,6 +450,215 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
             displayHitCount += delta
         }
         lastRawHitCount = rawCount
+    }
+
+    // MARK: - Connection lifecycle
+
+    private var isReconnecting: Bool {
+        reconnectTask != nil || pendingPeripheral != nil
+    }
+
+    /// Starts a connection the user (or the launch auto-connect) asked for and resets the auto-reconnect budget.
+    private func beginConnection(to device: SensorBallDevice, status newStatus: SensorBallBluetoothStatus) {
+        manualDisconnectRequested = false
+        reconnectAttempts = 0
+        cancelReconnect()
+        if let pendingPeripheral, pendingPeripheral.identifier != device.identifier {
+            central.cancelPeripheralConnection(pendingPeripheral)
+        }
+        reconnectTarget = device
+        connect(device.peripheral, status: newStatus)
+    }
+
+    private func connect(_ peripheral: CBPeripheral, status newStatus: SensorBallBluetoothStatus) {
+        guard central.state == .poweredOn else {
+            status = .notPoweredOn
+            return
+        }
+        central.stopScan()
+        readyDispatched = false
+        pendingPeripheral = peripheral
+        status = newStatus
+        central.connect(peripheral)
+        // CoreBluetooth never times out a pending connect, so give each attempt Android's 12 s window.
+        startConnectionWatchdog(for: peripheral)
+    }
+
+    private func dispatchReady() {
+        readyDispatched = true
+        cancelConnectionWatchdog()
+        reconnectAttempts = 0
+        if gyroscopeEnabled {
+            // The link dropped during a running session: keep counting hits.
+            setGyroscopeEnabled(true)
+            status = .reconnectedDuringTraining(connectedDevice?.name ?? Self.devicePrefix)
+        } else {
+            setGyroscopeEnabled(false)
+            setLightEnabled(false)
+            requestTelemetryRefresh(allowGyroscopeOffFallback: false)
+            status = .ready
+        }
+        startBatteryRefreshLoop()
+    }
+
+    private func clearConnectionState() {
+        stopBatteryRefreshLoop()
+        isLightOn = false
+        connectedDevice = nil
+        writeCharacteristic = nil
+        readableCharacteristics.removeAll()
+        notifyCharacteristics.removeAll()
+        readyDispatched = false
+    }
+
+    /// After any disconnect only Scan stays available, like Android; the reconnect target is kept separately.
+    private func clearDeviceList() {
+        devices.removeAll()
+        selectedDevice = nil
+    }
+
+    /// Lists and selects the connected device, like Android's onConnected.
+    private func rememberDevice(_ device: SensorBallDevice) {
+        if let index = devices.firstIndex(where: { $0.identifier == device.identifier }) {
+            devices[index] = device
+        } else {
+            devices.insert(device, at: 0)
+        }
+        selectedDevice = device
+    }
+
+    /// Mirrors the Android app: up to 12 reconnect attempts with exponential backoff after a non-manual disconnect.
+    /// Connection timeouts and failed connects land here too and count as attempts.
+    private func handleUnexpectedDisconnect() {
+        cancelConnectionWatchdog()
+        pendingPeripheral = nil
+        clearDeviceList()
+        guard !manualDisconnectRequested, let target = reconnectTarget else {
+            status = .disconnected
+            return
+        }
+        guard central.state == .poweredOn else {
+            return
+        }
+        guard reconnectAttempts < Self.maxReconnectAttempts else {
+            status = .reconnectPaused
+            return
+        }
+        reconnectAttempts += 1
+        let attempt = reconnectAttempts
+        let delay = Self.reconnectDelay(forAttempt: attempt)
+        status = .reconnectScheduled(delaySeconds: delay, attempt: attempt, maxAttempts: Self.maxReconnectAttempts)
+        reconnectTask?.cancel()
+        reconnectTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            guard !Task.isCancelled, let self else { return }
+            self.reconnectTask = nil
+            guard !self.manualDisconnectRequested, self.connectedDevice == nil else { return }
+            self.connect(target.peripheral, status: .reconnecting(target.name))
+        }
+    }
+
+    private static func reconnectDelay(forAttempt attempt: Int) -> TimeInterval {
+        let slot = min(max(attempt - 1, 0), 4)
+        return min(initialReconnectDelay * Double(1 << slot), maxReconnectDelay)
+    }
+
+    private func cancelReconnect() {
+        reconnectTask?.cancel()
+        reconnectTask = nil
+    }
+
+    private func stopAutoReconnect() {
+        cancelReconnect()
+        cancelConnectionWatchdog()
+        reconnectAttempts = 0
+        if connectedDevice == nil, let pendingPeripheral, central.state == .poweredOn {
+            central.cancelPeripheralConnection(pendingPeripheral)
+        }
+        pendingPeripheral = nil
+    }
+
+    private func startConnectionWatchdog(for peripheral: CBPeripheral) {
+        connectionWatchdogTask?.cancel()
+        connectionWatchdogTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(Self.connectionTimeout * 1_000_000_000))
+            guard !Task.isCancelled, let self else { return }
+            self.connectionWatchdogTask = nil
+            let isCurrentAttempt =
+                self.pendingPeripheral?.identifier == peripheral.identifier ||
+                self.connectedDevice?.identifier == peripheral.identifier
+            guard isCurrentAttempt, !self.readyDispatched, !self.manualDisconnectRequested else { return }
+            self.central.cancelPeripheralConnection(peripheral)
+            self.clearConnectionState()
+            self.handleUnexpectedDisconnect()
+        }
+    }
+
+    private func cancelConnectionWatchdog() {
+        connectionWatchdogTask?.cancel()
+        connectionWatchdogTask = nil
+    }
+
+    private func handleBluetoothUnavailable(status newStatus: SensorBallBluetoothStatus) {
+        cancelReconnect()
+        cancelConnectionWatchdog()
+        pendingPeripheral = nil
+        clearConnectionState()
+        clearDeviceList()
+        status = newStatus
+    }
+
+    /// Launch auto-connect: connect straight to the saved device without scanning, like Android's
+    /// autoConnectLastBluetoothDevice. Falls back to scanning for it when the system no longer knows it.
+    private func autoConnectLastDevice(identifier: UUID) {
+        guard let peripheral = central.retrievePeripherals(withIdentifiers: [identifier]).first else {
+            beginScan(autoReconnectTo: identifier)
+            return
+        }
+        autoReconnectIdentifier = nil
+        let name = UserDefaults.standard.string(forKey: Self.lastDeviceNameKey) ?? peripheral.name ?? Self.devicePrefix
+        let device = SensorBallDevice(
+            id: peripheral.identifier,
+            name: name,
+            identifier: peripheral.identifier,
+            rssi: 0,
+            advertisedServices: [],
+            peripheral: peripheral
+        )
+        rememberDevice(device)
+        beginConnection(to: device, status: .autoConnecting(name))
+    }
+
+    // MARK: - Battery refresh
+
+    /// Polls telemetry every 3 s (1.2 s while charging), like the Android battery refresh loop.
+    private func startBatteryRefreshLoop() {
+        stopBatteryRefreshLoop()
+        batteryRefreshTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 700_000_000)
+            while !Task.isCancelled {
+                guard let self, self.connectedDevice != nil else { return }
+                let interval: TimeInterval
+                if self.isTrainingActive || self.gyroscopeEnabled {
+                    interval = Self.batteryRefreshInterval
+                } else if Date() < self.batteryRefreshPausedUntil {
+                    interval = 0.2
+                } else {
+                    let charging = self.telemetry?.isCharging == true
+                    self.requestTelemetryRefresh(
+                        allowGyroscopeOffFallback: !self.isLightOn,
+                        forceGyroscopeOffFallback: charging && !self.isLightOn
+                    )
+                    interval = charging ? Self.chargingBatteryRefreshInterval : Self.batteryRefreshInterval
+                }
+                try? await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+            }
+        }
+    }
+
+    private func stopBatteryRefreshLoop() {
+        batteryRefreshTask?.cancel()
+        batteryRefreshTask = nil
     }
 
     static func parseTelemetry(_ data: Data) -> SensorBallTelemetry? {
@@ -302,9 +698,11 @@ final class SensorBallBluetoothManager: NSObject, ObservableObject {
         return serviceUUIDs
     }
 
+    /// Same rule as Android's isBoxingDeviceName: trimmed, "SENBALL#" prefix in any case, last character an ASCII digit.
     private static func matchesSensorBall(name: String) -> Bool {
         let normalized = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard normalized.hasPrefix(devicePrefix), let lastScalar = normalized.unicodeScalars.last else {
+        guard normalized.range(of: devicePrefix, options: [.anchored, .caseInsensitive]) != nil,
+              let lastScalar = normalized.unicodeScalars.last else {
             return false
         }
         return (48...57).contains(Int(lastScalar.value))
@@ -324,20 +722,20 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
         Task { @MainActor in
             switch central.state {
             case .poweredOn:
-                if let autoReconnectIdentifier, connectedDevice == nil {
-                    beginScan(autoReconnectTo: autoReconnectIdentifier)
+                if connectedDevice == nil, !manualDisconnectRequested, let reconnectTarget {
+                    reconnectAttempts = 0
+                    connect(reconnectTarget.peripheral, status: .reconnecting(reconnectTarget.name))
+                } else if let autoReconnectIdentifier, connectedDevice == nil {
+                    autoConnectLastDevice(identifier: autoReconnectIdentifier)
                 } else {
-                    statusText = "Bluetooth ready"
+                    status = .ready
                 }
             case .poweredOff:
-                isLightOn = false
-                statusText = "Bluetooth is off"
+                handleBluetoothUnavailable(status: .poweredOff)
             case .unauthorized:
-                isLightOn = false
-                statusText = "Bluetooth permission denied"
+                handleBluetoothUnavailable(status: .unauthorized)
             default:
-                isLightOn = false
-                statusText = "Bluetooth unavailable"
+                handleBluetoothUnavailable(status: .unavailable)
             }
         }
     }
@@ -373,45 +771,76 @@ extension SensorBallBluetoothManager: CBCentralManagerDelegate {
                 autoReconnectIdentifier = nil
                 selectedDevice = item
                 central.stopScan()
-                statusText = "Auto-connecting \(item.name)..."
-                central.connect(peripheral)
+                beginConnection(to: item, status: .autoConnecting(item.name))
                 return
             }
-            statusText = "\(devices.count) SENBALL# device(s) found"
+            status = devices.count == 1 ? .autoSelected(item.name) : .devicesFound(devices.count)
         }
     }
 
     nonisolated func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         Task { @MainActor in
+            guard pendingPeripheral?.identifier == peripheral.identifier else {
+                // A connection that is no longer wanted, e.g. it finished after the user disconnected.
+                central.cancelPeripheralConnection(peripheral)
+                return
+            }
+            pendingPeripheral = nil
             peripheral.delegate = self
-            connectedDevice = devices.first(where: { $0.identifier == peripheral.identifier }) ??
+            let knownDevice = reconnectTarget?.identifier == peripheral.identifier
+                ? reconnectTarget
+                : devices.first(where: { $0.identifier == peripheral.identifier })
+            let device = knownDevice ??
                 SensorBallDevice(
                     id: peripheral.identifier,
-                    name: peripheral.name ?? "SENBALL#",
+                    name: peripheral.name ?? Self.devicePrefix,
                     identifier: peripheral.identifier,
                     rssi: 0,
                     advertisedServices: [],
                     peripheral: peripheral
                 )
+            connectedDevice = device
+            rememberDevice(device)
             UserDefaults.standard.set(peripheral.identifier.uuidString, forKey: Self.lastDeviceIdentifierKey)
+            UserDefaults.standard.set(device.name, forKey: Self.lastDeviceNameKey)
             autoReconnectIdentifier = nil
             writeCharacteristic = nil
             readableCharacteristics.removeAll()
             notifyCharacteristics.removeAll()
+            readyDispatched = false
             isLightOn = false
-            statusText = "Connected. Discovering services..."
+            status = .discoveringServices
             peripheral.discoverServices(nil)
+        }
+    }
+
+    nonisolated func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+        Task { @MainActor in
+            guard pendingPeripheral?.identifier == peripheral.identifier else {
+                return
+            }
+            clearConnectionState()
+            handleUnexpectedDisconnect()
         }
     }
 
     nonisolated func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         Task { @MainActor in
-            connectedDevice = nil
-            writeCharacteristic = nil
-            readableCharacteristics.removeAll()
-            notifyCharacteristics.removeAll()
-            isLightOn = false
-            statusText = "Bluetooth disconnected"
+            let isCurrentPeripheral =
+                connectedDevice?.identifier == peripheral.identifier ||
+                pendingPeripheral?.identifier == peripheral.identifier
+            guard isCurrentPeripheral else {
+                // Already handled: a manual disconnect or a timed-out attempt we cancelled ourselves.
+                return
+            }
+            clearConnectionState()
+            if manualDisconnectRequested {
+                pendingPeripheral = nil
+                clearDeviceList()
+                status = .disconnected
+                return
+            }
+            handleUnexpectedDisconnect()
         }
     }
 }
@@ -427,6 +856,9 @@ extension SensorBallBluetoothManager: CBPeripheralDelegate {
 
     nonisolated func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         Task { @MainActor in
+            guard connectedDevice?.identifier == peripheral.identifier else {
+                return
+            }
             service.characteristics?.forEach { characteristic in
                 if writeCharacteristic == nil && (characteristic.properties.contains(.write) || characteristic.properties.contains(.writeWithoutResponse)) {
                     writeCharacteristic = characteristic
@@ -439,12 +871,8 @@ extension SensorBallBluetoothManager: CBPeripheralDelegate {
                     peripheral.setNotifyValue(true, for: characteristic)
                 }
             }
-            if writeCharacteristic != nil {
-                statusText = "Bluetooth ready"
-                setGyroscopeEnabled(false)
-                setLightEnabled(false)
-                requestTelemetryRefresh(allowGyroscopeOffFallback: false)
-                statusText = "Bluetooth ready"
+            if writeCharacteristic != nil && !readyDispatched {
+                dispatchReady()
             }
         }
     }

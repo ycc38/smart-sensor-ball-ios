@@ -145,6 +145,12 @@ struct CloudLeaderboardResult: Codable {
     var isOK: Bool { status == "ok" || success == true }
 }
 
+/// Badges unlocked and tier promotion caused by one training upload, used for the post-training celebrations.
+struct CloudUploadHighlights {
+    let unlockedAchievements: [CloudAchievementItem]
+    let promotedTier: CloudTierProgress?
+}
+
 enum LeaderboardBoard: String, CaseIterable, Identifiable {
     case best30 = "best_30_hits"
     case best60 = "best_60_hits"
@@ -259,9 +265,18 @@ final class CloudStore: ObservableObject {
 
     private let client = SensorBallAPIClient()
 
+    /// Session lengths the server accepts (sensorball-server SUPPORTED_MODE_SECONDS). Burst results (10/15 s)
+    /// stay on this phone; add their lengths here once the server accepts them.
+    static let cloudUploadModeSeconds: Set<Int> = [30, 60]
+
+    static func isCloudUploadable(_ report: TrainingReport) -> Bool {
+        cloudUploadModeSeconds.contains(report.mode.durationSeconds)
+    }
+
     private enum Keys {
         static let activation = "activation_state_v1"
         static let installId = "install_id_v1"
+        static let lastSeenTier = "last_seen_tier"
     }
 
     init() {
@@ -314,16 +329,39 @@ final class CloudStore: ObservableObject {
         }
     }
 
-    func upload(report: TrainingReport, language: AppLanguage) async {
+    @discardableResult
+    func upload(report: TrainingReport, language: AppLanguage) async -> CloudUploadHighlights? {
+        guard Self.isCloudUploadable(report) else {
+            statusMessage = L10n.text("burst_saved_locally", language)
+            return nil
+        }
         guard let activationState = activationState else {
             statusMessage = L10n.text("cloud_needs_activation", language)
-            return
+            return nil
         }
+        // Without a loaded badge list every unlocked badge would look new, so only compare against a real baseline.
+        let hasAchievementBaseline = !achievements.isEmpty
+        let previousUnlockedKeys = Set(achievements.filter(\.unlocked).map(\.key))
+        let previousTierLevel = tier?.level ?? profile?.currentTier ?? UserDefaults.standard.integer(forKey: Keys.lastSeenTier)
+        var highlights: CloudUploadHighlights?
         await runBusy {
             let result = try await client.uploadTrainingSession(state: activationState, report: report, appVersion: appVersion)
             apply(result)
             statusMessage = result.message ?? L10n.text(result.isOK ? "cloud_synced" : "cloud_failed", language)
+            guard result.isOK else { return }
+            var unlocked: [CloudAchievementItem] = []
+            if hasAchievementBaseline {
+                unlocked = (result.achievements ?? [])
+                    .filter { $0.unlocked && !previousUnlockedKeys.contains($0.key) }
+                    .sorted { ($0.sortOrder ?? 0) < ($1.sortOrder ?? 0) }
+            }
+            var promotedTier: CloudTierProgress?
+            if let newTier = result.tier, let newLevel = newTier.level, previousTierLevel > 0, newLevel > previousTierLevel {
+                promotedTier = newTier
+            }
+            highlights = CloudUploadHighlights(unlockedAchievements: unlocked, promotedTier: promotedTier)
         }
+        return highlights
     }
 
     func refreshLeaderboard(language: AppLanguage) async {
@@ -393,6 +431,7 @@ final class CloudStore: ObservableObject {
         achievements = result.achievements ?? achievements
         tier = result.tier ?? tier
         promoted = result.promoted ?? false
+        rememberSeenTier(result.tier)
     }
 
     private func apply(_ result: CloudSessionUploadResult) {
@@ -402,6 +441,13 @@ final class CloudStore: ObservableObject {
         achievements = result.achievements ?? achievements
         tier = result.tier ?? tier
         promoted = result.promoted ?? false
+        rememberSeenTier(result.tier)
+    }
+
+    private func rememberSeenTier(_ tier: CloudTierProgress?) {
+        if let level = tier?.level {
+            UserDefaults.standard.set(level, forKey: Keys.lastSeenTier)
+        }
     }
 
     private func runBusy(_ operation: () async throws -> Void) async {
@@ -525,6 +571,7 @@ final class SpeechCueService: NSObject, ObservableObject, AVSpeechSynthesizerDel
     func speakCue(_ text: String) {
         synthesizer.stopSpeaking(at: .immediate)
         let utterance = AVSpeechUtterance(string: text)
+        utterance.voice = Self.voiceForAppLanguage()
         utterance.rate = 0.5
         utterance.pitchMultiplier = 1.05
         synthesizer.speak(utterance)
@@ -532,9 +579,15 @@ final class SpeechCueService: NSObject, ObservableObject, AVSpeechSynthesizerDel
 
     func speakCelebration(_ text: String) {
         let utterance = AVSpeechUtterance(string: text)
+        utterance.voice = Self.voiceForAppLanguage()
         utterance.rate = 0.48
         utterance.pitchMultiplier = 1.08
         synthesizer.speak(utterance)
+    }
+
+    /// Speaks in the app language; nil keeps the system default voice when that language has no voice installed.
+    private static func voiceForAppLanguage() -> AVSpeechSynthesisVoice? {
+        AVSpeechSynthesisVoice(language: AppLanguage.current.speechLanguageCode)
     }
 }
 

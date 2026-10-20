@@ -26,7 +26,7 @@ The app display name is `Vimai Smart Sensor Ball` in every supported language. T
 - The first bundled punch sound is preloaded locally; the app does not request cloud sound effects.
 - A local user profile is generated automatically; registration, login, and activation codes are not required.
 - API base URL: `https://sensorball.wavemill.cn/sensorball/api/v1/`
-- Chinese, English, French, and Thai UI text
+- Chinese, English, French, Spanish, German, Korean, and Thai UI text
 - Privacy policy and user agreement assets
 
 ## Build Requirements

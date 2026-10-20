@@ -30,6 +30,6 @@
 
 - Disconnect while training.
 - Start training without Bluetooth connected.
-- Switch among Chinese, English, French, and Thai.
+- Switch among Chinese, English, French, Spanish, German, Korean, and Thai.
 - Open privacy policy and user agreement.
 

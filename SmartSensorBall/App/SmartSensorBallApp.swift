@@ -19,7 +19,8 @@ struct SmartSensorBallApp: App {
                     trainingManager.attach(
                         bluetoothManager: bluetoothManager,
                         soundEffectManager: soundEffectManager,
-                        speechCueService: speechCueService
+                        speechCueService: speechCueService,
+                        cloudStore: cloudStore
                     )
                 }
         }

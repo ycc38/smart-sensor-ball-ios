@@ -1,0 +1,16 @@
+Smart sensor ball Datenschutzrichtlinie
+Version: V1.0
+Gültig ab: 2026-05-15
+
+Smart sensor ball verarbeitet Daten, die für Bluetooth, Schlagzählung, Training, Erfolge, Ranglisten und Profilfunktionen erforderlich sind. Das Produkt benötigt keine Seriennummer und keinen Aktivierungscode. Die App sammelt keine Seriennummern oder Aktivierungscodes.
+
+Trainingsdaten werden zunächst lokal auf deinem Gerät gespeichert. Bevor die App Trainingsergebnisse zum ersten Mal für die Cloud-Synchronisierung oder globale Ranglisten hochlädt, bittet sie in der App um deine Einwilligung. Erst nach deiner Zustimmung werden Trainingsergebnis, Trainingsmodus, Spitzname oder maskierte Geräte-ID, Stufe sowie die erforderlichen App- und Gerätedienstkennungen in die Smart sensor ball Cloud hochgeladen. Wenn du nicht zustimmst, bleiben lokales Bluetooth-Training und lokale Aufzeichnungen verfügbar.
+
+Wir verkaufen deine personenbezogenen Daten nicht. Spitzname, Avatar, Rang und Punktzahl können erst in Ranglisten angezeigt werden, nachdem du dem Hochladen der Ranglistendaten zugestimmt hast.
+
+Wichtige Berechtigungen: Bluetooth zum Verbinden von SENBALL# Geräten, Netzwerk für Synchronisierung und Bildzugriff nur bei Avatar-Auswahl oder Bildfreigabe.
+
+Du kannst bestimmte Profilinformationen in der App ansehen und bearbeiten. Du kannst uns kontaktieren, um Beratung, Berichtigung, Löschung oder die Entfernung aus der Ranglistenanzeige zu beantragen, soweit Gesetz und Produktsicherheit dies zulassen.
+
+Betreiber: Shaoxing Weimai Technology Co., Ltd.
+Email: zclei@vip.sina.com
